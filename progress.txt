@@ -1,3 +1,7 @@
+TASK-043 sync done.
+Browser-level a11y and keyboard/focus tooling already worked. Verified `npm run test:a11y` and `npm run test:browser` pass with DOM fallback here.
+Updated TASK-043 status in `tasks.json` from pending to done.
+
 TASK-043 done.
 Accessibility and browser-level tooling already in place: `npm run test:a11y` and `npm run test:browser` both pass.
 Next step: TASK-038 if a11y automation needs the next pass, or TASK-039 for manual QA checklist.
