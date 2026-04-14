@@ -49,6 +49,9 @@ describe('Date utilities scaffold', () => {
     const sameDaySource = dp.read('src/components/date-picker/lib/date/isSameDay.ts');
     const sameMonthSource = dp.read('src/components/date-picker/lib/date/isSameMonth.ts');
     const todaySource = dp.read('src/components/date-picker/lib/date/getToday.ts');
+    const startOfWeekSource = dp.read('src/components/date-picker/lib/date/startOfWeek.ts');
+    const firstDayOfWeekSource = dp.read('src/components/date-picker/lib/i18n/getFirstDayOfWeek.ts');
+    const monthMatrixSource = dp.read('src/components/date-picker/lib/date/buildMonthMatrix.ts');
 
     expect(normalizeDateSource).toContain('new Date(date.getFullYear(), date.getMonth(), date.getDate())');
     expect(compareDatesSource).toContain('export const compareByDay');
@@ -57,5 +60,19 @@ describe('Date utilities scaffold', () => {
     expect(sameMonthSource).toContain('getFullYear() === right.getFullYear()');
     expect(todaySource).toContain("import { normalizeDate } from './normalizeDate';");
     expect(todaySource).toContain('normalizeDate(new Date())');
+    expect(startOfWeekSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(startOfWeekSource).toContain('normalizeFirstDayOfWeek');
+    expect(startOfWeekSource).toContain('const dayOffset = (normalizedDate.getDay() - normalizedFirstDayOfWeek + 7) % 7;');
+    expect(firstDayOfWeekSource).toContain("new Intl.Locale(locale).weekInfo");
+    expect(firstDayOfWeekSource).toContain('DEFAULT_LOCALE');
+    expect(firstDayOfWeekSource).toContain('REGION_FIRST_DAY');
+    expect(monthMatrixSource).toContain("import { getFirstDayOfWeek } from '../i18n/getFirstDayOfWeek';");
+    expect(monthMatrixSource).toContain("import { startOfWeek } from './startOfWeek';");
+    expect(monthMatrixSource).toContain('const WEEKS_IN_MONTH_GRID = 6;');
+    expect(monthMatrixSource).toContain('const DAYS_IN_WEEK = 7;');
+    expect(monthMatrixSource).toContain('const gridStart = startOfWeek(firstOfMonth, firstDayOfWeek);');
+    expect(monthMatrixSource).toContain('for (let weekIndex = 0; weekIndex < WEEKS_IN_MONTH_GRID; weekIndex += 1)');
+    expect(monthMatrixSource).toContain('for (let dayIndex = 0; dayIndex < DAYS_IN_WEEK; dayIndex += 1)');
+    expect(monthMatrixSource).toContain('matrix.push(week);');
   });
 });

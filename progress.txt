@@ -14,3 +14,8 @@ compareByDay gives -1/0/1 by calendar day.
 isSameDay, isSameMonth, and getToday use date-only logic.
 Next step: build month matrix and week-start helpers on top.
 Validation note: `uv`, `ruff`, and `pytest` are not installed in this workspace. Node date-picker unit harness passed instead.
+TASK-005 done.
+Month math now exists in startOfWeek, getFirstDayOfWeek, and buildMonthMatrix.
+Grid starts from locale week start and builds a 6x7 month matrix.
+Next step: wire this grid into calendar UI and month navigation.
+Validation note: `uv run ruff check .` and `uv run pytest` both fail here because `uv` is missing. Local node harness passed.
