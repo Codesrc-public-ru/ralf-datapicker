@@ -1,3 +1,9 @@
+TASK-026 done.
+Day cell states now have distinct visual treatment in `DatePicker.module.css` for selected, focused, unavailable, and outsideMonth.
+Added DOM coverage in `src/components/date-picker/tests/dom-stack.test.tsx` for selected, focused, unavailable, and outside-month render states.
+Validation note: `npm run test:integration`, `npm test`, `npm run lint`, and `npm run typecheck` passed.
+Next step: TASK-027 if locale integration is the next priority.
+
 TASK-041 sync done.
 Typecheck gate already exists in `package.json` and `tsconfig.json`.
 Verified with `npm run typecheck`; pass.

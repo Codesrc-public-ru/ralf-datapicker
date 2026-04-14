@@ -84,18 +84,27 @@
   min-block-size: 2.5rem;
   padding: 0.125rem;
   text-align: center;
+  vertical-align: middle;
 }
 
 .dayButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   min-inline-size: 2.5rem;
   min-block-size: 2.5rem;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: inherit;
+  font: inherit;
+  line-height: 1;
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease,
+    opacity 120ms ease;
 }
 
 .selected {
@@ -105,16 +114,25 @@
 }
 
 .focused {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px canvas,
+    0 0 0 4px currentColor;
 }
 
 .disabled {
-  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .outsideMonth {
-  opacity: 0.4;
+  color: inherit;
+}
+
+.cell.disabled .dayButton {
+  opacity: 0.45;
+}
+
+.cell.outsideMonth .dayButton {
+  opacity: 0.7;
 }
 
 .invalid {
