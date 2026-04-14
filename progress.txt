@@ -3,3 +3,7 @@ DatePicker type layer is split now.
 Public props use shared aliases.
 Internal state has clear input, calendar, keyboard, focus, live region, and validation models.
 Next step: build validation and parsing behavior on top.
+TASK-003 done.
+Test scaffold is live.
+Runner covers unit, integration, and a11y source checks.
+Next step: add real React DOM test deps when project gets them.
