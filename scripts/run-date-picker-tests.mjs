@@ -5,12 +5,15 @@ import path from 'node:path';
 import vm from 'node:vm';
 import * as ts from 'typescript';
 
+import { createDatePickerTestHarness } from './date-picker-test-harness.mjs';
+
 const rootDir = process.cwd();
 const mode = process.argv[2] ?? 'all';
 
 const testFilesByMode = {
   all: [
     'src/components/date-picker/tests/DatePicker.test.tsx',
+    'src/components/date-picker/tests/dom-stack.test.tsx',
     'src/components/date-picker/tests/date-utils.test.ts',
     'src/components/date-picker/tests/input-validation.test.tsx',
     'src/components/date-picker/tests/keyboard-navigation.test.tsx',
@@ -23,6 +26,7 @@ const testFilesByMode = {
     'src/components/date-picker/tests/input-validation.test.tsx'
   ],
   integration: [
+    'src/components/date-picker/tests/dom-stack.test.tsx',
     'src/components/date-picker/tests/keyboard-navigation.test.tsx',
     'src/components/date-picker/tests/focus-management.test.tsx'
   ],
@@ -39,6 +43,8 @@ if (!testFiles) {
 const suites = [];
 const testCases = [];
 let skipped = 0;
+
+const harness = createDatePickerTestHarness(rootDir);
 
 const dp = {
   rootDir,
@@ -61,7 +67,16 @@ const dp = {
 const context = vm.createContext({
   console,
   dp,
+  React: harness.React,
+  act: harness.act,
+  cleanup: harness.cleanup,
+  document: harness.document,
   expect,
+  requireSource: harness.requireSource,
+  render: harness.render,
+  screen: harness.screen,
+  user: harness.user,
+  window: harness.window,
   describe,
   ts,
   test,
@@ -101,6 +116,8 @@ for (const testCase of testCases) {
 
 console.log(`done ${passed} passed, ${skipped} skipped, ${failures} failed`);
 
+await harness.teardown();
+
 if (failures > 0) {
   process.exit(1);
 }
@@ -130,11 +147,55 @@ describe.skip = function skipDescribe() {};
 
 function expect(actual) {
   return {
+    toBeDisabled() {
+      assert.ok(
+        isDomElement(actual) && (actual.disabled || actual.getAttribute('disabled') !== null),
+        'Expected element to be disabled'
+      );
+    },
+    toBeInTheDocument() {
+      assert.ok(isInDocument(actual), 'Expected node to be in document');
+    },
+    toBeVisible() {
+      assert.ok(isDomElement(actual) && isVisibleElement(actual), 'Expected element to be visible');
+    },
     toBe(expected) {
       assert.strictEqual(actual, expected);
     },
     toEqual(expected) {
       assert.deepStrictEqual(actual, expected);
+    },
+    toHaveAttribute(name, value) {
+      assert.ok(isDomElement(actual), 'toHaveAttribute expects a DOM element');
+      const attributeValue = actual.getAttribute(name);
+
+      if (value === undefined) {
+        assert.ok(attributeValue !== null, `Expected ${name} attribute to exist`);
+        return;
+      }
+
+      assert.strictEqual(attributeValue, String(value));
+    },
+    toHaveFocus() {
+      assert.ok(
+        isDomElement(actual) && actual.ownerDocument?.activeElement === actual,
+        'Expected element to have focus'
+      );
+    },
+    toHaveTextContent(expected) {
+      assert.ok(isDomElement(actual) || isTextNode(actual), 'toHaveTextContent expects a DOM node');
+      const text = actual.textContent ?? '';
+
+      if (expected instanceof RegExp) {
+        assert.ok(expected.test(text), `Expected ${formatValue(text)} to match ${expected}`);
+        return;
+      }
+
+      assert.strictEqual(text, String(expected));
+    },
+    toHaveValue(expected) {
+      assert.ok(isDomElement(actual), 'toHaveValue expects a DOM element');
+      assert.strictEqual(actual.value, expected);
     },
     toContain(expected) {
       assert.ok(
@@ -161,6 +222,18 @@ function expect(actual) {
       assert.ok(!actual);
     },
     not: {
+      toBeDisabled() {
+        assert.ok(
+          !(isDomElement(actual) && (actual.disabled || actual.getAttribute('disabled') !== null)),
+          'Expected element not to be disabled'
+        );
+      },
+      toBeInTheDocument() {
+        assert.ok(!isInDocument(actual), 'Expected node not to be in document');
+      },
+      toBeVisible() {
+        assert.ok(!(isDomElement(actual) && isVisibleElement(actual)), 'Expected element not to be visible');
+      },
       toContain(expected) {
         assert.ok(
           typeof actual === 'string' || Array.isArray(actual),
@@ -178,9 +251,81 @@ function expect(actual) {
       },
       toBe(expected) {
         assert.notStrictEqual(actual, expected);
+      },
+      toHaveAttribute(name, value) {
+        assert.ok(isDomElement(actual), 'toHaveAttribute expects a DOM element');
+        const attributeValue = actual.getAttribute(name);
+
+        if (value === undefined) {
+          assert.ok(attributeValue === null, `Expected ${name} attribute to be absent`);
+          return;
+        }
+
+        assert.notStrictEqual(attributeValue, String(value));
+      },
+      toHaveFocus() {
+        assert.ok(
+          !(isDomElement(actual) && actual.ownerDocument?.activeElement === actual),
+          'Expected element not to have focus'
+        );
+      },
+      toHaveTextContent(expected) {
+        assert.ok(isDomElement(actual) || isTextNode(actual), 'toHaveTextContent expects a DOM node');
+        const text = actual.textContent ?? '';
+
+        if (expected instanceof RegExp) {
+          assert.ok(!expected.test(text), `Expected ${formatValue(text)} not to match ${expected}`);
+          return;
+        }
+
+        assert.notStrictEqual(text, String(expected));
+      },
+      toHaveValue(expected) {
+        assert.ok(isDomElement(actual), 'toHaveValue expects a DOM element');
+        assert.notStrictEqual(actual.value, expected);
       }
     }
   };
+}
+
+function isDomElement(value) {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      typeof value.getAttribute === 'function' &&
+      typeof value.setAttribute === 'function' &&
+      typeof value.tagName === 'string'
+  );
+}
+
+function isTextNode(value) {
+  return Boolean(value && typeof value === 'object' && value.nodeType === 3);
+}
+
+function isInDocument(value) {
+  return Boolean(value && value.ownerDocument && value.ownerDocument.body.contains(value));
+}
+
+function isVisibleElement(element) {
+  if (!isDomElement(element)) {
+    return false;
+  }
+
+  if (element.hidden || element.getAttribute('hidden') !== null) {
+    return false;
+  }
+
+  let current = element;
+
+  while (current) {
+    if (isDomElement(current) && (current.hidden || current.getAttribute('hidden') !== null)) {
+      return false;
+    }
+
+    current = current.parentNode;
+  }
+
+  return true;
 }
 
 function formatValue(value) {

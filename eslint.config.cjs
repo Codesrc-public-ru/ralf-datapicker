@@ -86,11 +86,19 @@ module.exports = [
       globals: {
         ...globals.browser,
         ...globals.node,
+        React: 'readonly',
+        cleanup: 'readonly',
         dp: 'readonly',
         describe: 'readonly',
         expect: 'readonly',
+        document: 'readonly',
+        render: 'readonly',
+        requireSource: 'readonly',
+        screen: 'readonly',
         ts: 'readonly',
-        test: 'readonly'
+        test: 'readonly',
+        user: 'readonly',
+        window: 'readonly'
       }
     },
     rules: {
