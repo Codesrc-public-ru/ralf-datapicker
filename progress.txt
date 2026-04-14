@@ -1,3 +1,8 @@
+TASK-002 done.
+Shared internal type layer now lives in `src/components/date-picker/types/internal.types.ts`.
+Moved hook and UI prop types out of component files, and `validation.ts` now reuses the shared input model.
+Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
 TASK-035 done.
 Added real keyboard integration flow in `keyboard-navigation.test.tsx`.
 Test now proves open focus, ArrowRight, PageDown, Enter, and Escape in browser-like harness.

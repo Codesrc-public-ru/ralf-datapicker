@@ -1,22 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type {
-  ButtonHTMLAttributes,
-  HTMLAttributes,
-  ReactNode,
-  Ref
-} from 'react';
-
-interface CalendarDayCellProps extends HTMLAttributes<HTMLTableCellElement> {
-  children: ReactNode;
-  dayButtonProps: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
-    ref?: Ref<HTMLButtonElement>;
-  };
-  focused?: boolean;
-  outsideMonth?: boolean;
-  selected?: boolean;
-  unavailable?: boolean;
-}
+import type { CalendarDayCellProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined, stateClassNames: string[]): string =>
   [styles.cell, ...stateClassNames, className ?? ''].filter(Boolean).join(' ');

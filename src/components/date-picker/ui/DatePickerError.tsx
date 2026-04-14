@@ -1,10 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { HTMLAttributes, ReactNode } from 'react';
-
-interface DatePickerErrorProps extends HTMLAttributes<HTMLParagraphElement> {
-  children?: ReactNode;
-}
+import type { DatePickerErrorProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.error, className ?? ''].filter(Boolean).join(' ');

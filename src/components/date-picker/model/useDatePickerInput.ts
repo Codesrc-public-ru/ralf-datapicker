@@ -4,17 +4,11 @@ import { formatInputDate } from '../lib/input/formatInputDate';
 import { parseInputDate } from '../lib/input/parseInputDate';
 import { sanitizeInputValue } from '../lib/input/sanitizeInputValue';
 
-import type { DatePickerInputState } from '../types/internal.types';
+import type { DatePickerInputController } from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
 
 const getControlledInputValue = (value: Date | null): string =>
   value ? formatInputDate(value) : '';
-
-export interface DatePickerInputController extends DatePickerInputState {
-  handleInputChange: (nextValue: string) => void;
-  handleInputFocus: () => void;
-  handleInputBlur: () => void;
-}
 
 export default function useDatePickerInput(props: DatePickerProps): DatePickerInputController {
   const { onChange } = props;

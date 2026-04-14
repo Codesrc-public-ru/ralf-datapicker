@@ -1,11 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { HTMLAttributes, ReactNode } from 'react';
-
-interface CalendarHeaderProps extends HTMLAttributes<HTMLElement> {
-  children?: ReactNode;
-  label: ReactNode;
-}
+import type { CalendarHeaderProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.header, className ?? ''].filter(Boolean).join(' ');

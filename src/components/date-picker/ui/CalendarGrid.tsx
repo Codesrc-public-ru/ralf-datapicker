@@ -1,11 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { TableHTMLAttributes, ReactNode } from 'react';
-
-interface CalendarGridProps extends TableHTMLAttributes<HTMLTableElement> {
-  children: ReactNode;
-  caption?: ReactNode;
-}
+import type { CalendarGridProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.grid, className ?? ''].filter(Boolean).join(' ');

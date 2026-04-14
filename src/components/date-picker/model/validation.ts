@@ -3,20 +3,13 @@ import { isDateInRange } from '../lib/date/isDateInRange';
 import { formatInputDate } from '../lib/input/formatInputDate';
 
 import type { ParsedInputDate } from '../lib/input/parseInputDate';
-import type { DatePickerValidationState, ValidationErrorType } from '../types/internal.types';
+import type {
+  DatePickerValidationInput,
+  DatePickerValidationState,
+  ValidationErrorType
+} from '../types/internal.types';
 
 export type { DatePickerValidationState, ValidationErrorType } from '../types/internal.types';
-
-export interface DatePickerValidationInput {
-  parsedInput: ParsedInputDate;
-  candidateDate: Date | null;
-  minDate?: Date | null;
-  maxDate?: Date | null;
-  externalInvalid?: boolean;
-  externalErrorMessage?: string | null;
-  required?: boolean;
-  isVisible?: boolean;
-}
 
 const VALIDATION_MESSAGES: Record<Exclude<ValidationErrorType, null>, string> = {
   format: `Use ${FORMATS.INPUT}`,

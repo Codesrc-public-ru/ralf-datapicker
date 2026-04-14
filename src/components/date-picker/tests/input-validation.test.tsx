@@ -71,8 +71,15 @@ describe('Input helper layer', () => {
 
   test('keeps validation priority format, range, external, required in one helper', () => {
     const source = dp.read('src/components/date-picker/model/validation.ts');
+    const typesSource = dp.read('src/components/date-picker/types/internal.types.ts');
 
-    expect(source).toContain('export interface DatePickerValidationInput');
+    expect(typesSource).toContain('export interface DatePickerValidationInput');
+    expect(typesSource).toContain('export interface DatePickerInputController');
+    expect(typesSource).toContain('export interface DatePickerFocusController');
+    expect(typesSource).toContain('export interface DatePickerKeyboardController');
+    expect(typesSource).toContain('export interface DateSelectionOptions');
+    expect(typesSource).toContain('export interface DatePickerKeyboardNavigationOptions');
+    expect(typesSource).toContain('export interface DatePickerKeyboardNavigationResolution');
     expect(source).toContain('export const getDatePickerValidationState');
     expect(source).toContain('resolveDatePickerValidationState');
     expect(source).toContain('isDateInRange');

@@ -1,17 +1,6 @@
 import { useCallback } from 'react';
 
-import type { DatePickerFocusState } from '../types/internal.types';
-
-export interface DatePickerFocusController extends DatePickerFocusState {
-  handleDialogKeyDown: (event: DialogKeyDownEvent) => void;
-}
-
-interface DialogKeyDownEvent {
-  currentTarget: HTMLDivElement;
-  key: string;
-  preventDefault: () => void;
-  shiftKey: boolean;
-}
+import type { DatePickerDialogKeyDownEvent, DatePickerFocusController } from '../types/internal.types';
 
 const getFocusableButtons = (dialog: HTMLDivElement): HTMLButtonElement[] =>
   Array.from(dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])'));
@@ -21,7 +10,7 @@ const focusButtonAtIndex = (buttons: HTMLButtonElement[], index: number): void =
 };
 
 export default function useDatePickerFocus(): DatePickerFocusController {
-  const handleDialogKeyDown = useCallback((event: DialogKeyDownEvent) => {
+  const handleDialogKeyDown = useCallback((event: DatePickerDialogKeyDownEvent) => {
     if (event.key !== 'Tab') {
       return;
     }

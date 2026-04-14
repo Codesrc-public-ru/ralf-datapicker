@@ -1,11 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { HTMLAttributes, ReactNode } from 'react';
-
-interface DatePickerDialogProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-  open?: boolean;
-}
+import type { DatePickerDialogProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.dialog, className ?? ''].filter(Boolean).join(' ');

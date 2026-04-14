@@ -1,11 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { HTMLAttributes, ReactNode } from 'react';
-
-interface DatePickerFieldProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-  invalid?: boolean;
-}
+import type { DatePickerFieldProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined, invalid: boolean): string =>
   [styles.field, invalid ? styles.invalid : '', className ?? ''].filter(Boolean).join(' ');

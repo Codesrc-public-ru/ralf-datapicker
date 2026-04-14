@@ -18,31 +18,14 @@ import { normalizeDate } from '../lib/date/normalizeDate';
 import { startOfMonth } from '../lib/date/startOfMonth';
 import { getMonthYearLabel } from '../lib/i18n/getMonthYearLabel';
 
-import type { DatePickerStateController } from '../types/internal.types';
+import type {
+  DatePickerKeyboardController,
+  DatePickerKeyboardNavigationOptions,
+  DatePickerKeyboardNavigationResolution,
+  DatePickerStateController
+} from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
-
-interface KeyboardNavigationOptions {
-  firstDayOfWeek?: number;
-  disabledDates?: DatePickerProps['disabledDates'];
-  maxDate?: DatePickerProps['maxDate'];
-  minDate?: DatePickerProps['minDate'];
-  shiftKey?: boolean;
-}
-
-interface KeyboardNavigationResolution {
-  action: 'noop' | 'move-focus' | 'select-focused-date' | 'close-dialog';
-  nextFocusedDate: Date | null;
-  shouldSelectFocusedDate: boolean;
-  shouldCloseDialog: boolean;
-  shouldPreventDefault: boolean;
-}
-
-export interface DatePickerKeyboardController {
-  handleGridKeyDown: (event: ReactKeyboardEvent<HTMLTableElement>) => void;
-  handleDayFocus: (date: Date) => () => void;
-  registerDayButton: (date: Date) => (element: HTMLButtonElement | null) => void;
-}
 
 interface DatePickerKeyboardOptions {
   controller: DatePickerStateController;
@@ -56,7 +39,7 @@ interface DatePickerKeyboardOptions {
   setLiveRegionMessage: (message: string) => void;
 }
 
-const createNeutralResolution = (): KeyboardNavigationResolution => ({
+const createNeutralResolution = (): DatePickerKeyboardNavigationResolution => ({
   action: 'noop',
   nextFocusedDate: null,
   shouldSelectFocusedDate: false,
@@ -70,11 +53,11 @@ const getDateKey = (date: Date): string =>
 export const resolveKeyboardNavigation = (
   key: string,
   focusedDate: Date,
-  options: KeyboardNavigationOptions = {}
-): KeyboardNavigationResolution => {
+  options: DatePickerKeyboardNavigationOptions = {}
+): DatePickerKeyboardNavigationResolution => {
   const firstDayOfWeek = options.firstDayOfWeek ?? 0;
   const shiftKey = options.shiftKey ?? false;
-  const resolveMoveFocus = (nextFocusedDate: Date | null): KeyboardNavigationResolution => {
+  const resolveMoveFocus = (nextFocusedDate: Date | null): DatePickerKeyboardNavigationResolution => {
     if (!nextFocusedDate || isDateDisabled(nextFocusedDate, options)) {
       return {
         ...createNeutralResolution(),

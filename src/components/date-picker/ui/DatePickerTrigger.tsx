@@ -2,11 +2,7 @@ import { forwardRef } from 'react';
 
 import styles from '../DatePicker.module.css';
 
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
-
-interface DatePickerTriggerProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  children: ReactNode;
-}
+import type { DatePickerTriggerProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.trigger, className ?? ''].filter(Boolean).join(' ');

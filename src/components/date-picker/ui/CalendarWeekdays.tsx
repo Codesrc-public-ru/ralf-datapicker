@@ -1,10 +1,6 @@
 import styles from '../DatePicker.module.css';
 
-import type { HTMLAttributes, ReactNode } from 'react';
-
-interface CalendarWeekdaysProps extends HTMLAttributes<HTMLTableSectionElement> {
-  weekdayLabels: readonly ReactNode[];
-}
+import type { CalendarWeekdaysProps } from '../types/internal.types';
 
 const joinClassName = (className: string | undefined): string =>
   [styles.weekdays, className ?? ''].filter(Boolean).join(' ');

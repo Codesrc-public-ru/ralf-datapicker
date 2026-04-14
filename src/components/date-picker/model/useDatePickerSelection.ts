@@ -5,17 +5,7 @@ import { isDateDisabled } from '../lib/date/isDateDisabled';
 import { normalizeDate } from '../lib/date/normalizeDate';
 import { formatFullDateLabel } from '../lib/i18n/formatFullDateLabel';
 
-import type { DatePickerProps } from '../types/public.types';
-
-interface DateSelectionOptions {
-  closeDialog: () => void;
-  disabledDates?: DatePickerProps['disabledDates'];
-  maxDate?: DatePickerProps['maxDate'];
-  minDate?: DatePickerProps['minDate'];
-  locale?: DatePickerProps['locale'];
-  onChange: DatePickerProps['onChange'];
-  setLiveRegionMessage: (message: string) => void;
-}
+import type { DateSelectionOptions } from '../types/internal.types';
 
 export const selectDate = (date: Date, options: DateSelectionOptions): boolean => {
   if (isDateDisabled(date, options)) {
