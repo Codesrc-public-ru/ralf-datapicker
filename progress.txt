@@ -1,3 +1,10 @@
+TASK-021 done.
+Keyboard engine now lives in `src/components/date-picker/model/useDatePickerKeyboard.ts`.
+It resolves Arrow keys, Home/End, PageUp/PageDown, Shift+PageUp/Down, Enter, Space, and Escape into calendar actions.
+Keyboard constants are centralized in `src/components/date-picker/constants/keyboard.ts`.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed.
+Validation note: `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 TASK-011 done.
 Validation layer now lives in `src/components/date-picker/model/validation.ts`.
 It resolves one error at a time in the order format -> range -> external -> required.

@@ -1,3 +1,11 @@
+## Progress Update for TASK-021
+
+**Status:** Done.
+
+**Completion:** Implemented the keyboard engine in `src/components/date-picker/model/useDatePickerKeyboard.ts`. The resolver now maps Arrow keys, Home/End, PageUp/PageDown, Shift+PageUp/Down, Enter, Space, and Escape to the correct calendar actions, with keyboard constants centralized in `src/components/date-picker/constants/keyboard.ts`.
+
+**Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 ## Progress Update for TASK-011
 
 **Status:** Done.

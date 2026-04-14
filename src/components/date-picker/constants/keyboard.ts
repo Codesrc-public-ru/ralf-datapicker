@@ -1,2 +1,13 @@
-// Only real shared constants.
-export const KEYBOARD_KEYS = { ENTER: 'Enter', ESCAPE: 'Escape' };
+export const KEYBOARD_KEYS = {
+  ARROW_DOWN: 'ArrowDown',
+  ARROW_LEFT: 'ArrowLeft',
+  ARROW_RIGHT: 'ArrowRight',
+  ARROW_UP: 'ArrowUp',
+  END: 'End',
+  ENTER: 'Enter',
+  ESCAPE: 'Escape',
+  HOME: 'Home',
+  PAGE_DOWN: 'PageDown',
+  PAGE_UP: 'PageUp',
+  SPACE: ' '
+} as const;
