@@ -189,3 +189,8 @@ TASK-028 done.
 DatePicker styles now adapt for narrow viewports with stacked field controls, full-width dialog, larger touch targets, and explicit focus-visible rings.
 Browser check script now loads the DatePicker CSS and verifies desktop/mobile responsive layout when Chromium is available.
 Validation note: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` passed. Chromium browser check blocked here, so the script used DOM fallback.
+
+TASK-033 done.
+Added helper unit coverage for input, i18n, a11y, and validation layers.
+New tests hit sanitize/parse/format, two locales, aria text builders, and validation priority in real runtime checks.
+Validation note: `npm run test:unit`, `npm run lint`, and `npm run typecheck` passed.
