@@ -1,2 +1,4 @@
-// Helpers preparing aria props or localized SR strings.
-export const getInputDescribedBy = (errorId: string): string => errorId;
+const normalizeDescribedById = (id) => (typeof id === 'string' ? id.trim() : '');
+
+export const getInputDescribedBy = (...ids) =>
+  Array.from(new Set(ids.map(normalizeDescribedById).filter(Boolean))).join(' ');

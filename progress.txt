@@ -43,3 +43,12 @@ sanitizeInputValue normalizes pasted separators and keeps invalid draft text vis
 parseInputDate now splits empty, partial, valid, format, and calendar states.
 formatInputDate now returns canonical DD.MM.YYYY text with zero padding.
 Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .`, `uv run pytest`, and `tsc --noEmit` could not run here because those tools are not installed in this workspace.
+
+TASK-010 done.
+a11y helpers now live in lib/a11y with real behavior.
+getTriggerAriaLabel speaks empty vs selected state with locale-aware full date.
+getDayAriaLabel speaks selected, unavailable, and outside month states.
+getInputDescribedBy composes and dedupes ids.
+getLiveRegionMessage joins announcement parts cleanly.
+getDialogAriaProps returns dialog role, aria-modal, title id, and hidden state for closed dialog.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` both fail because `uv` is not installed in this workspace.

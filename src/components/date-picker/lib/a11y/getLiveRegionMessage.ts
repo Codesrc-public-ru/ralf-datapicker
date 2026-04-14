@@ -1,2 +1,4 @@
-// Helpers preparing aria props or localized SR strings.
-export const getLiveRegionMessage = (message: string): string => message;
+const normalizeMessagePart = (part) => (typeof part === 'string' ? part.trim() : '');
+
+export const getLiveRegionMessage = (...parts) =>
+  parts.map(normalizeMessagePart).filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
