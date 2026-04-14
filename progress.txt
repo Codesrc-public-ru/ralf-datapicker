@@ -128,3 +128,7 @@ Manual input now commits valid dates through `onChange(Date)` and full clear thr
 Draft text stays visible while editing, even when the controlled value still points to the old date.
 Next step: wire blur-driven error display and submit/external invalid states on top of this input commit flow.
 Validation note: `npm run test:unit`, `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
+TASK-025 done.
+Keyboard navigation now respects `minDate`, `maxDate`, and `disabledDates` when moving focus. `resolveKeyboardNavigation` blocks movement into unavailable targets, so focus stays on the current enabled day. Disabled dates already stay blocked by selection logic, so unavailable days no longer change value by click or keyboard.
+Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.

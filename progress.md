@@ -100,3 +100,11 @@
 **Completion:** Built the public `DatePicker` shell in `src/components/date-picker/DatePicker.tsx`. The component now wires controlled `value` into `formatInputDate`, connects the shell to `useDatePickerState`, `useDatePickerInput`, and `useDatePickerFocus`, and renders the basic field, trigger, and error slot through the presentational UI layer.
 
 **Validation:** Shell wiring is covered by the updated source-level DatePicker scaffold test. Next step is open/close and calendar behavior in the following task.
+
+## Progress Update for TASK-025
+
+**Status:** Done.
+
+**Completion:** Integrated `minDate`/`maxDate`/`disabledDates` into keyboard navigation so unavailable dates do not become the next focused day. `resolveKeyboardNavigation` now blocks movement into disabled targets and keeps the current focus stable. Selection already stays blocked through `selectDate`, so unavailable dates no longer change value by click or keyboard.
+
+**Validation:** `npm run lint`, `npm run typecheck`, and `npm test` passed.

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { selectDate } from './useDatePickerSelection';
 import { KEYBOARD_KEYS } from '../constants/keyboard';
+import { isDateDisabled } from '../lib/date/isDateDisabled';
 import {
   getEndDate,
   getHomeDate,
@@ -20,6 +21,9 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 
 interface KeyboardNavigationOptions {
   firstDayOfWeek?: number;
+  disabledDates?: DatePickerProps['disabledDates'];
+  maxDate?: DatePickerProps['maxDate'];
+  minDate?: DatePickerProps['minDate'];
   shiftKey?: boolean;
 }
 
@@ -28,6 +32,7 @@ interface KeyboardNavigationResolution {
   nextFocusedDate: Date | null;
   shouldSelectFocusedDate: boolean;
   shouldCloseDialog: boolean;
+  shouldPreventDefault: boolean;
 }
 
 export interface DatePickerKeyboardController {
@@ -50,7 +55,8 @@ const createNeutralResolution = (): KeyboardNavigationResolution => ({
   action: 'noop',
   nextFocusedDate: null,
   shouldSelectFocusedDate: false,
-  shouldCloseDialog: false
+  shouldCloseDialog: false,
+  shouldPreventDefault: false
 });
 
 const getDateKey = (date: Date): string =>
@@ -65,80 +71,58 @@ export const resolveKeyboardNavigation = (
 ): KeyboardNavigationResolution => {
   const firstDayOfWeek = options.firstDayOfWeek ?? 0;
   const shiftKey = options.shiftKey ?? false;
+  const resolveMoveFocus = (nextFocusedDate: Date | null): KeyboardNavigationResolution => {
+    if (!nextFocusedDate || isDateDisabled(nextFocusedDate, options)) {
+      return {
+        ...createNeutralResolution(),
+        shouldPreventDefault: true
+      };
+    }
+
+    return {
+      action: 'move-focus',
+      nextFocusedDate,
+      shouldSelectFocusedDate: false,
+      shouldCloseDialog: false,
+      shouldPreventDefault: true
+    };
+  };
 
   switch (key) {
     case KEYBOARD_KEYS.ARROW_LEFT:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: moveDateByDays(focusedDate, -1),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(moveDateByDays(focusedDate, -1));
     case KEYBOARD_KEYS.ARROW_RIGHT:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: moveDateByDays(focusedDate, 1),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(moveDateByDays(focusedDate, 1));
     case KEYBOARD_KEYS.ARROW_UP:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: moveDateByWeeks(focusedDate, -1),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(moveDateByWeeks(focusedDate, -1));
     case KEYBOARD_KEYS.ARROW_DOWN:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: moveDateByWeeks(focusedDate, 1),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(moveDateByWeeks(focusedDate, 1));
     case KEYBOARD_KEYS.HOME:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: getHomeDate(focusedDate, firstDayOfWeek),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(getHomeDate(focusedDate, firstDayOfWeek));
     case KEYBOARD_KEYS.END:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: getEndDate(focusedDate, firstDayOfWeek),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(getEndDate(focusedDate, firstDayOfWeek));
     case KEYBOARD_KEYS.PAGE_UP:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: shiftKey ? getShiftPageUpDate(focusedDate) : getPageUpDate(focusedDate),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(shiftKey ? getShiftPageUpDate(focusedDate) : getPageUpDate(focusedDate));
     case KEYBOARD_KEYS.PAGE_DOWN:
-      return {
-        action: 'move-focus',
-        nextFocusedDate: shiftKey
-          ? getShiftPageDownDate(focusedDate)
-          : getPageDownDate(focusedDate),
-        shouldSelectFocusedDate: false,
-        shouldCloseDialog: false
-      };
+      return resolveMoveFocus(
+        shiftKey ? getShiftPageDownDate(focusedDate) : getPageDownDate(focusedDate)
+      );
     case KEYBOARD_KEYS.ENTER:
     case KEYBOARD_KEYS.SPACE:
       return {
         action: 'select-focused-date',
         nextFocusedDate: focusedDate,
         shouldSelectFocusedDate: true,
-        shouldCloseDialog: false
+        shouldCloseDialog: false,
+        shouldPreventDefault: true
       };
     case KEYBOARD_KEYS.ESCAPE:
       return {
         action: 'close-dialog',
         nextFocusedDate: focusedDate,
         shouldSelectFocusedDate: false,
-        shouldCloseDialog: true
+        shouldCloseDialog: true,
+        shouldPreventDefault: true
       };
     default:
       return createNeutralResolution();
@@ -217,11 +201,15 @@ export default function useDatePickerKeyboard({
         shiftKey: event.shiftKey
       });
 
-      if (resolution.action === 'noop' || !resolution.nextFocusedDate) {
+      if (!resolution.shouldPreventDefault) {
         return;
       }
 
       event.preventDefault();
+
+      if (resolution.action === 'noop' || !resolution.nextFocusedDate) {
+        return;
+      }
 
       if (resolution.shouldSelectFocusedDate) {
         selectDate(resolution.nextFocusedDate, {

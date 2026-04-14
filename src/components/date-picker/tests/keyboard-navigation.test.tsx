@@ -42,6 +42,7 @@ describe('Keyboard integration scaffold', () => {
 
     expect(source).toContain('useDatePickerKeyboard');
     expect(source).toContain('resolveKeyboardNavigation');
+    expect(source).toContain("import { isDateDisabled } from '../lib/date/isDateDisabled';");
     expect(source).toContain('handleGridKeyDown');
     expect(source).toContain('handleDayFocus');
     expect(source).toContain('registerDayButton');
@@ -53,6 +54,7 @@ describe('Keyboard integration scaffold', () => {
     expect(source).toContain('getPageDownDate');
     expect(source).toContain('getShiftPageUpDate');
     expect(source).toContain('getShiftPageDownDate');
+    expect(source).toContain('shouldPreventDefault');
   });
 
   test('wires keyboard handling into the calendar grid and day cells', () => {
@@ -85,6 +87,7 @@ describe('Keyboard integration scaffold', () => {
     const focusedDate = makeDate(15);
 
     const deps = {
+      isDateDisabled: () => false,
       KEYBOARD_KEYS,
       moveDateByDays: (_date, amount) => {
         calls.push(['days', amount]);
@@ -131,84 +134,97 @@ describe('Keyboard integration scaffold', () => {
         key: KEYBOARD_KEYS.ARROW_LEFT,
         expectedAction: 'move-focus',
         expectedCall: ['days', -1],
-        expectedDay: 14
+        expectedDay: 14,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.ARROW_RIGHT,
         expectedAction: 'move-focus',
         expectedCall: ['days', 1],
-        expectedDay: 16
+        expectedDay: 16,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.ARROW_UP,
         expectedAction: 'move-focus',
         expectedCall: ['weeks', -1],
-        expectedDay: 8
+        expectedDay: 8,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.ARROW_DOWN,
         expectedAction: 'move-focus',
         expectedCall: ['weeks', 1],
-        expectedDay: 22
+        expectedDay: 22,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.HOME,
         expectedAction: 'move-focus',
         expectedCall: ['home', 1],
-        expectedDay: 2
+        expectedDay: 2,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.END,
         expectedAction: 'move-focus',
         expectedCall: ['end', 1],
-        expectedDay: 8
+        expectedDay: 8,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.PAGE_UP,
         expectedAction: 'move-focus',
         expectedCall: ['month', -1],
-        expectedDay: 5
+        expectedDay: 5,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.PAGE_DOWN,
         expectedAction: 'move-focus',
         expectedCall: ['month', 1],
-        expectedDay: 25
+        expectedDay: 25,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.PAGE_UP,
         shiftKey: true,
         expectedAction: 'move-focus',
         expectedCall: ['year', -1],
-        expectedDay: 9
+        expectedDay: 9,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.PAGE_DOWN,
         shiftKey: true,
         expectedAction: 'move-focus',
         expectedCall: ['year', 1],
-        expectedDay: 21
+        expectedDay: 21,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.ENTER,
         expectedAction: 'select-focused-date',
         expectedCall: null,
         expectedDay: 15,
-        shouldSelectFocusedDate: true
+        shouldSelectFocusedDate: true,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.SPACE,
         expectedAction: 'select-focused-date',
         expectedCall: null,
         expectedDay: 15,
-        shouldSelectFocusedDate: true
+        shouldSelectFocusedDate: true,
+        expectedPreventDefault: true
       },
       {
         key: KEYBOARD_KEYS.ESCAPE,
         expectedAction: 'close-dialog',
         expectedCall: null,
         expectedDay: 15,
-        shouldCloseDialog: true
+        shouldCloseDialog: true,
+        expectedPreventDefault: true
       }
     ];
 
@@ -223,11 +239,53 @@ describe('Keyboard integration scaffold', () => {
       expect(result.nextFocusedDate.getDate()).toBe(scenario.expectedDay);
       expect(result.shouldSelectFocusedDate).toBe(Boolean(scenario.shouldSelectFocusedDate));
       expect(result.shouldCloseDialog).toBe(Boolean(scenario.shouldCloseDialog));
+      expect(result.shouldPreventDefault).toBe(Boolean(scenario.expectedPreventDefault));
       if (scenario.expectedCall) {
         expect(calls).toEqual([scenario.expectedCall]);
       } else {
         expect(calls).toEqual([]);
       }
     }
+  });
+
+  test('keeps keyboard focus stable when the next day is disabled', () => {
+    const KEYBOARD_KEYS = {
+      ARROW_LEFT: 'ArrowLeft',
+      ARROW_RIGHT: 'ArrowRight',
+      ARROW_UP: 'ArrowUp',
+      ARROW_DOWN: 'ArrowDown',
+      END: 'End',
+      ENTER: 'Enter',
+      ESCAPE: 'Escape',
+      HOME: 'Home',
+      PAGE_DOWN: 'PageDown',
+      PAGE_UP: 'PageUp',
+      SPACE: ' '
+    };
+
+    const { resolveKeyboardNavigation } = loadModule(
+      'src/components/date-picker/model/useDatePickerKeyboard.ts',
+      ['resolveKeyboardNavigation'],
+      {
+        isDateDisabled: (date) => date.getDate() === 16,
+        KEYBOARD_KEYS,
+        getEndDate: (date) => date,
+        getHomeDate: (date) => date,
+        getPageDownDate: (date) => date,
+        getPageUpDate: (date) => date,
+        getShiftPageDownDate: (date) => date,
+        getShiftPageUpDate: (date) => date,
+        moveDateByDays: (_date, amount) => new Date(2026, 2, 15 + amount),
+        moveDateByWeeks: (_date, amount) => new Date(2026, 2, 15 + amount * 7)
+      }
+    );
+
+    const result = resolveKeyboardNavigation(KEYBOARD_KEYS.ARROW_RIGHT, new Date(2026, 2, 15));
+
+    expect(result.action).toBe('noop');
+    expect(result.nextFocusedDate).toBe(null);
+    expect(result.shouldPreventDefault).toBe(true);
+    expect(result.shouldSelectFocusedDate).toBe(false);
+    expect(result.shouldCloseDialog).toBe(false);
   });
 });
