@@ -1,2 +1,1 @@
-// Presentational components only.
-export const DatePickerTrigger = (props: any) => <button />; // Stub
+// Placeholder for trigger button

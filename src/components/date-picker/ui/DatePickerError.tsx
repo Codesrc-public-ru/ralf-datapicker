@@ -1,2 +1,1 @@
-// Presentational components only.
-export const DatePickerError = (props: any) => <div>Error</div>; // Stub
+// Placeholder for error text
