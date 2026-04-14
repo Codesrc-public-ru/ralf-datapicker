@@ -89,6 +89,7 @@ module.exports = [
         dp: 'readonly',
         describe: 'readonly',
         expect: 'readonly',
+        ts: 'readonly',
         test: 'readonly'
       }
     },

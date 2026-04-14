@@ -1,3 +1,11 @@
+## Progress Update for TASK-041
+
+**Status:** Done.
+
+**Completion:** Added a separate `typecheck` quality gate with `tsconfig.json` and `npm run typecheck`. Added `src/types/css-modules.d.ts`, `src/types/test-globals.d.ts`, and `src/types/intl.d.ts` so the DatePicker source typechecks cleanly. Updated the date-picker test runner to transpile TypeScript modules before eval, which keeps the existing runtime tests working.
+
+**Validation:** `npm run typecheck`, `npm run lint`, and `npm test` passed.
+
 ## Progress Update for TASK-021
 
 **Status:** Done.

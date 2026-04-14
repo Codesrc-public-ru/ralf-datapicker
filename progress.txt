@@ -1,3 +1,9 @@
+TASK-041 done.
+Added a separate `typecheck` gate with `tsconfig.json` and `npm run typecheck`.
+Added CSS module and test globals declarations so TypeScript checks the DatePicker source cleanly.
+Extended the date-picker test runner to transpile TypeScript modules before eval, so runtime tests still pass.
+Validation note: `npm run typecheck`, `npm run lint`, and `npm test` passed.
+
 TASK-040 done.
 ESLint gate already exist in `eslint.config.cjs`.
 It covers source and test files for TypeScript, React, hooks, import order, and jsx-a11y rules.

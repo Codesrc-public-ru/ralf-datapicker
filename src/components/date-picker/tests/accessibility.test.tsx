@@ -1,6 +1,13 @@
 describe('Accessibility helpers', () => {
   function loadModule(relativePath, exportNames, deps = {}) {
-    const source = dp.read(relativePath);
+    const source = ts.transpileModule(dp.read(relativePath), {
+      compilerOptions: {
+        esModuleInterop: true,
+        jsx: ts.JsxEmit.ReactJSX,
+        module: ts.ModuleKind.ESNext,
+        target: ts.ScriptTarget.ES2022
+      }
+    }).outputText;
     const transformed = source
       .replace(/^\s*import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];\s*$/gm, (_, names) => {
         return `const { ${names} } = deps;`;

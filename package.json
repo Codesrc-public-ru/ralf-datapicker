@@ -11,6 +11,7 @@
   },
   "scripts": {
     "lint": "eslint \"src/components/date-picker/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
     "test:unit": "node scripts/run-date-picker-tests.mjs unit",
     "test:integration": "node scripts/run-date-picker-tests.mjs integration",
     "test:a11y": "node scripts/run-date-picker-tests.mjs a11y",

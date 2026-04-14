@@ -20,12 +20,12 @@ const REGION_FIRST_DAY = {
   YE: 6
 };
 
-const normalizeDayIndex = (day) => {
+const normalizeDayIndex = (day: number): number => {
   const normalized = day % 7;
   return normalized < 0 ? normalized + 7 : normalized;
 };
 
-const getLocaleWeekInfoFirstDay = (locale) => {
+const getLocaleWeekInfoFirstDay = (locale: string): number | null => {
   try {
     const weekInfo = new Intl.Locale(locale).weekInfo;
 
@@ -39,12 +39,12 @@ const getLocaleWeekInfoFirstDay = (locale) => {
   }
 };
 
-const getLocaleRegion = (locale) => {
+const getLocaleRegion = (locale: string): string | null => {
   const match = locale.match(/-([a-z]{2}|\d{3})(?:-|$)/i);
   return match ? match[1].toUpperCase() : null;
 };
 
-export const getFirstDayOfWeek = (locale = DEFAULT_LOCALE) => {
+export const getFirstDayOfWeek = (locale: string = DEFAULT_LOCALE): number => {
   const effectiveLocale = locale || DEFAULT_LOCALE;
   const firstDayOfWeek = getLocaleWeekInfoFirstDay(effectiveLocale);
   if (firstDayOfWeek !== null) {
@@ -53,7 +53,7 @@ export const getFirstDayOfWeek = (locale = DEFAULT_LOCALE) => {
 
   const region = getLocaleRegion(effectiveLocale);
   if (region && Object.prototype.hasOwnProperty.call(REGION_FIRST_DAY, region)) {
-    return REGION_FIRST_DAY[region];
+    return REGION_FIRST_DAY[region as keyof typeof REGION_FIRST_DAY];
   }
 
   return 0;

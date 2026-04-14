@@ -2,7 +2,14 @@ import { formatFullDateLabel } from '../i18n/formatFullDateLabel';
 
 const DEFAULT_LOCALE = Intl.DateTimeFormat().resolvedOptions().locale;
 
-const buildDayStateLabel = (options) => {
+interface DayAriaLabelOptions {
+  locale?: string;
+  selected?: boolean;
+  unavailable?: boolean;
+  outsideMonth?: boolean;
+}
+
+const buildDayStateLabel = (options: DayAriaLabelOptions | undefined): string[] => {
   const stateLabels = [];
 
   if (options?.selected) {
@@ -20,7 +27,7 @@ const buildDayStateLabel = (options) => {
   return stateLabels;
 };
 
-export const getDayAriaLabel = (date, options = {}) => {
+export const getDayAriaLabel = (date: Date, options: DayAriaLabelOptions = {}): string => {
   const locale = options.locale ?? DEFAULT_LOCALE;
   const dayLabel = formatFullDateLabel(date, locale);
   const stateLabels = buildDayStateLabel(options);

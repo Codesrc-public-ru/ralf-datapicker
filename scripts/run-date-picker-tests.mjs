@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import * as ts from 'typescript';
 
 const rootDir = process.cwd();
 const mode = process.argv[2] ?? 'all';
@@ -62,6 +63,7 @@ const context = vm.createContext({
   dp,
   expect,
   describe,
+  ts,
   test,
   globalThis: null
 });

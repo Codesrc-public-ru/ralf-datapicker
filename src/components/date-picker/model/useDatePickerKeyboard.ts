@@ -10,14 +10,30 @@ import {
   moveDateByWeeks
 } from '../lib/date/navigation';
 
-const createNeutralResolution = () => ({
+interface KeyboardNavigationOptions {
+  firstDayOfWeek?: number;
+  shiftKey?: boolean;
+}
+
+interface KeyboardNavigationResolution {
+  action: 'noop' | 'move-focus' | 'select-focused-date' | 'close-dialog';
+  nextFocusedDate: Date | null;
+  shouldSelectFocusedDate: boolean;
+  shouldCloseDialog: boolean;
+}
+
+const createNeutralResolution = (): KeyboardNavigationResolution => ({
   action: 'noop',
   nextFocusedDate: null,
   shouldSelectFocusedDate: false,
   shouldCloseDialog: false
 });
 
-export const resolveKeyboardNavigation = (key, focusedDate, options = {}) => {
+export const resolveKeyboardNavigation = (
+  key: string,
+  focusedDate: Date,
+  options: KeyboardNavigationOptions = {}
+): KeyboardNavigationResolution => {
   const firstDayOfWeek = options.firstDayOfWeek ?? 0;
   const shiftKey = options.shiftKey ?? false;
 
@@ -102,7 +118,7 @@ export const resolveKeyboardNavigation = (key, focusedDate, options = {}) => {
   }
 };
 
-export default function useDatePickerKeyboard(_props) {
+export default function useDatePickerKeyboard(_props: unknown): { lastKeyPressed: null } {
   void _props;
 
   return {
