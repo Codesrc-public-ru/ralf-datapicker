@@ -154,6 +154,19 @@ describe('DatePicker unit scaffold', () => {
     expect(dp.read('src/components/date-picker/ui/CalendarDayCell.tsx')).toContain('disabled=');
   });
 
+  test('keeps selected day styling explicit instead of relying on currentColor tricks', () => {
+    const source = dp.read('src/components/date-picker/DatePicker.module.css');
+
+    expect(source).toContain('.selected {');
+    expect(source).toContain('background: rgba(243, 184, 111, 0.22);');
+    expect(source).toContain('color: #f2f4f8;');
+    expect(source).toContain('box-shadow: inset 0 0 0 2px rgba(243, 184, 111, 0.95);');
+    expect(source).toContain('.selected.focused {');
+    expect(source).toContain('0 0 0 4px rgba(243, 184, 111, 0.95);');
+    expect(source).not.toContain('background: currentColor;');
+    expect(source).not.toContain('color: canvas;');
+  });
+
   test('keeps dialog month selection driven by value or today on open', () => {
     const source = dp.read('src/components/date-picker/model/useDatePickerState.ts');
 
