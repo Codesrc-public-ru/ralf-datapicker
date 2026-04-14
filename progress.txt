@@ -1,3 +1,7 @@
+TASK-043 sync done.
+Verified browser-level a11y and keyboard/focus tooling already existed.
+Updated `tasks.json` status to done for TASK-043.
+
 TASK-003 done.
 Test infra already in place for unit, integration, and a11y runs.
 Verified `npm run test:unit`, `npm run test:integration`, `npm run test:a11y`, and `npm test`.
