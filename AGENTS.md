@@ -29,6 +29,13 @@ strong accessibility requirements
 WCAG 2.1/2.2 AA target
 WAI-ARIA APG Date Picker Dialog as behavioral reference
 
+Build and runtime target:
+
+- Vite is the app shell and build system.
+- The repo must expose `dev`, `build`, and `preview` scripts through Vite.
+- Browser entrypoint must be explicit, such as `index.html` plus `src/main.tsx` or equivalent.
+- Do not treat the DatePicker as library-only code without a runnable Vite app.
+
 Not marketing widget. Not experimental demo.
 Reusable product component for real forms, real users.
 
@@ -636,6 +643,9 @@ Required tools and checks:
 
 Required scripts:
 
+- `dev`
+- `build`
+- `preview`
 - `lint`
 - `typecheck`
 - `test:unit`
@@ -646,6 +656,7 @@ Rules:
 
 - ESLint must cover React, hooks, TypeScript, import ordering, and accessibility-sensitive patterns where relevant.
 - Structure validation is only a supplementary guard. It does not replace lint or tests.
+- Vite app shell, browser entrypoint, and production bundle path are required project infrastructure, not optional extras.
 - New quality tooling must be added through a task before implementation starts.
 - Interactive changes must be protected by keyboard, focus, and accessibility tests, not only unit tests.
 

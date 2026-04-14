@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@types/mocha": "^10.0.10",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
@@ -35,7 +36,7 @@
     "globals": "^16.5.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "vite": "^6.3.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^6.3.5"
   }
 }
