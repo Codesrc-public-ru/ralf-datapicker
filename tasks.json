@@ -1,0 +1,818 @@
+{
+  "agent_instructions": {
+    "before_start": [
+      "Прочитай этот файл и git log --oneline -20",
+      "Выбери ОДНУ задачу со статусом pending и наивысшим приоритетом",
+      "Проверь, что все dependencies этой задачи имеют статус done"
+    ],
+    "during_work": [
+      "Работай только над выбранной задачей",
+      "Делай коммиты после каждого логического изменения",
+      "Не трогай код, не связанный с текущей задачей"
+    ],
+    "before_finish": [
+      "Выполни ВСЕ test_steps из задачи",
+      "Меняй status на done ТОЛЬКО после успешного прохождения всех тестов",
+      "Напиши summary в progress.md",
+      "ЗАПРЕЩЕНО удалять или редактировать задачи — только менять status"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Создать файловую структуру DatePicker по PRD: types, model, lib, ui, constants, tests, index.ts и базовый DatePicker.module.css.",
+      "acceptance_criteria": [
+        "В проекте создана структура каталогов и файлов, соответствующая PRD.",
+        "Экспорт из index.ts и базовые заглушки файлов собираются без циклических импортов."
+      ],
+      "test_steps": [
+        "Шаг 1: создать каталоги и файлы по архитектурной схеме из PRD.",
+        "Шаг 2: проверить импорты между слоями и убедиться, что ui не тянет логику из React-less helpers напрямую через обход public слоя.",
+        "Шаг 3: ожидаемый результат — структура готова для инкрементальной реализации, сборка не падает из-за отсутствующих модулей."
+      ],
+      "dependencies": [],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-002",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Определить публичные и внутренние TypeScript-типы DatePicker, включая props, validation state и внутренние модели состояния.",
+      "acceptance_criteria": [
+        "Созданы public.types.ts и internal.types.ts без any и широких string-типов.",
+        "Публичный API строго отражает controlled-only контракт и состояния disabled/required/readOnly/invalid."
+      ],
+      "test_steps": [
+        "Шаг 1: описать типы props, типов ошибок и внутренних state-моделей.",
+        "Шаг 2: подключить типы в заглушки DatePicker и model/lib слоёв.",
+        "Шаг 3: ожидаемый результат — TypeScript валидирует контракты без any и без дублирующих определений."
+      ],
+      "dependencies": [
+        "TASK-001"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-003",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Настроить тестовую инфраструктуру для unit/integration/a11y-покрытия компонента, включая проверки с axe-core.",
+      "acceptance_criteria": [
+        "В проекте есть рабочая конфигурация для запуска unit и integration тестов компонента.",
+        "Доступен отдельный сценарий автоматической accessibility-проверки через axe-core."
+      ],
+      "test_steps": [
+        "Шаг 1: добавить и настроить тестовый раннер, окружение DOM и вспомогательные утилиты для React-компонентов.",
+        "Шаг 2: создать smoke-тест, который рендерит DatePicker и запускается локально.",
+        "Шаг 3: ожидаемый результат — тесты и axe-проверка запускаются одной командой без ручных правок."
+      ],
+      "dependencies": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-004",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать pure helpers для date-only нормализации и сравнения дат по календарному дню без timestamp-логики.",
+      "acceptance_criteria": [
+        "Есть отдельные функции normalizeDate, isSameDay, isSameMonth, compareByDay и getToday.",
+        "Сравнение даты не зависит от часов, минут и исходного timestamp."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать helpers в lib/date без React и без мутаций исходных Date.",
+        "Шаг 2: проверить сценарии с одинаковым днём при разных часах и с разными месяцами.",
+        "Шаг 3: ожидаемый результат — helpers стабильно сравнивают календарные дни как date-only значения."
+      ],
+      "dependencies": [
+        "TASK-002"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-005",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать pure helpers для построения календарного месяца: startOfWeek, first day of week и month matrix.",
+      "acceptance_criteria": [
+        "buildMonthMatrix возвращает предсказуемую сетку месяца с учётом первого дня недели.",
+        "Функции не зависят от JSX и поддерживают локализуемое начало недели."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать startOfWeek, getFirstDayOfWeek и buildMonthMatrix.",
+        "Шаг 2: проверить месяцы, начинающиеся в разные дни недели, и месяцы на границе года.",
+        "Шаг 3: ожидаемый результат — сетка месяца строится корректно для выбранной локали."
+      ],
+      "dependencies": [
+        "TASK-004"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-006",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать pure helpers перемещения по календарю: addDays, addMonths, addYears и вычисление дат для Home/End/PageUp/PageDown.",
+      "acceptance_criteria": [
+        "Есть функции перемещения по дню, неделе, месяцу и году без мутаций исходной даты.",
+        "Логика соответствует ожидаемому поведению клавиатурной навигации APG."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать addDays, addMonths, addYears и вспомогательные вычисления для недельной и месячной навигации.",
+        "Шаг 2: проверить переходы через конец месяца, года и високосные даты.",
+        "Шаг 3: ожидаемый результат — навигация даёт корректную целевую дату во всех граничных случаях."
+      ],
+      "dependencies": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-007",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать pure helpers для range и disabled-ограничений: minDate, maxDate, disabledDates-массив и predicate.",
+      "acceptance_criteria": [
+        "Есть функции isDateInRange и isDateDisabled с date-only сравнением.",
+        "Список disabledDates сравнивается по календарному дню, а predicate вызывается предсказуемо."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать range/disabled helpers в lib/date.",
+        "Шаг 2: проверить даты вне диапазона, даты из массива disabledDates и даты, запрещённые предикатом.",
+        "Шаг 3: ожидаемый результат — компонент сможет единообразно определять доступность даты."
+      ],
+      "dependencies": [
+        "TASK-004"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-008",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать слой input helpers: sanitizeInputValue, parseInputDate и formatInputDate для канонического ввода DD.MM.YYYY.",
+      "acceptance_criteria": [
+        "Парсер корректно различает частичный ввод, валидную дату и невалидный календарный день.",
+        "Форматтер возвращает строку для отображения без побочных эффектов и без JSX-логики."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать sanitize, parse и format helpers в lib/input.",
+        "Шаг 2: проверить ввод 01.05.2026, 31.02.2026, пустую строку и частичные значения вроде 12.0.",
+        "Шаг 3: ожидаемый результат — helpers позволяют безопасно поддержать ручной ввод без затирания черновика."
+      ],
+      "dependencies": [
+        "TASK-002",
+        "TASK-004"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-009",
+      "category": "functional",
+      "priority": "high",
+      "description": "Реализовать слой i18n helpers на Intl: названия месяцев, дней недели, полные spoken labels и первый день недели.",
+      "acceptance_criteria": [
+        "Есть helpers для month/year label, weekday labels, full date label и weekday names.",
+        "locale единообразно влияет на подписи, озвучивание и структуру недели."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать formatMonthLabel, formatWeekdayLabel, formatFullDateLabel, getWeekdayNames и getFirstDayOfWeek.",
+        "Шаг 2: проверить минимум две локали с разным началом недели и разными форматами подписей.",
+        "Шаг 3: ожидаемый результат — локализация вынесена в pure helpers и не разбросана по JSX."
+      ],
+      "dependencies": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-010",
+      "category": "functional",
+      "priority": "high",
+      "description": "Реализовать слой a11y helpers для aria-label, describedBy, dialog props и live region сообщений.",
+      "acceptance_criteria": [
+        "Есть централизованные helpers для trigger aria-label, day aria-label, dialog props, describedBy и live region текста.",
+        "Формирование screen reader текста не зашито внутрь JSX-компонентов."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать a11y helpers в lib/a11y.",
+        "Шаг 2: проверить тексты для выбранной даты, недоступной даты и пустого значения.",
+        "Шаг 3: ожидаемый результат — aria-тексты формируются детерминированно и готовы к unit-тестированию."
+      ],
+      "dependencies": [
+        "TASK-007",
+        "TASK-009"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-011",
+      "category": "functional",
+      "priority": "high",
+      "description": "Реализовать validation layer с приоритетом ошибок format → range → external → required.",
+      "acceptance_criteria": [
+        "Валидация возвращает один итоговый errorType и один errorMessage за раз.",
+        "Во время активного ввода можно отличить черновик без немедленной ошибки от состояния, которое нужно показать на blur/submit."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать validation helpers и итоговую модель ValidationState.",
+        "Шаг 2: проверить конкурирующие сценарии ошибок: невалидный формат, required и внешний invalid одновременно.",
+        "Шаг 3: ожидаемый результат — компонент показывает только одну приоритетную ошибку в нужном порядке."
+      ],
+      "dependencies": [
+        "TASK-007",
+        "TASK-008",
+        "TASK-010"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-012",
+      "category": "ui",
+      "priority": "high",
+      "description": "Собрать базовые presentational-компоненты поля: DatePickerField, DatePickerTrigger и DatePickerError с CSS Modules.",
+      "acceptance_criteria": [
+        "Компоненты рендерят input, trigger и error text без бизнес-логики и date math внутри.",
+        "CSS Modules создают базовую структуру поля и состояние invalid без глобальной утечки стилей."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать dumb UI-компоненты поля и связать их через props.",
+        "Шаг 2: проверить, что input, trigger и error text можно отрисовать независимо от календаря.",
+        "Шаг 3: ожидаемый результат — поле готово к подключению state и a11y слоёв."
+      ],
+      "dependencies": [
+        "TASK-001",
+        "TASK-002"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-013",
+      "category": "functional",
+      "priority": "high",
+      "description": "Реализовать useDatePickerState для open/close, visibleMonth, focusedDate и live region message.",
+      "acceptance_criteria": [
+        "Внутренний state ограничен transient UI-состояниями и не дублирует selected value как источник истины.",
+        "Есть явные state transitions для открытия, закрытия, смены месяца и обновления фокуса."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать hook управления состоянием диалога и календарного вида.",
+        "Шаг 2: проверить сценарии открытия без value, с value и со сменой visibleMonth.",
+        "Шаг 3: ожидаемый результат — базовая оркестрация календаря изолирована от JSX и легко тестируется."
+      ],
+      "dependencies": [
+        "TASK-004",
+        "TASK-005",
+        "TASK-006",
+        "TASK-002"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-014",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Реализовать public DatePicker shell с controlled API, связав props, базовое поле и model/lib слои без тяжёлой логики в JSX.",
+      "acceptance_criteria": [
+        "DatePicker принимает value/onChange и прокидывает подготовленные props в UI-части.",
+        "Компонент не содержит смешанного кода date math, a11y текста и inline keyboard-алгоритмов."
+      ],
+      "test_steps": [
+        "Шаг 1: собрать DatePicker.tsx как оркестратор поверх типов, hooks и ui-компонентов.",
+        "Шаг 2: подключить controlled props и базовый рендер input/trigger/error без календаря.",
+        "Шаг 3: ожидаемый результат — есть единая публичная точка входа для дальнейшего наращивания поведения."
+      ],
+      "dependencies": [
+        "TASK-012",
+        "TASK-013"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-015",
+      "category": "ui",
+      "priority": "critical",
+      "description": "Реализовать presentational-компоненты календаря: DatePickerDialog, CalendarHeader, CalendarWeekdays, CalendarGrid и CalendarDayCell.",
+      "acceptance_criteria": [
+        "Компоненты календаря принимают подготовленные данные и не содержат бизнес-правил выбора даты.",
+        "Структура сетки использует надёжный паттерн td + button внутри ячейки."
+      ],
+      "test_steps": [
+        "Шаг 1: создать UI-компоненты диалога, заголовка, ряда дней недели, сетки и ячейки дня.",
+        "Шаг 2: отрендерить месяц на основе готовой month matrix без интерактивного поведения.",
+        "Шаг 3: ожидаемый результат — UI-слой календаря готов к подключению a11y и событий."
+      ],
+      "dependencies": [
+        "TASK-005",
+        "TASK-012"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-016",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Реализовать открытие/закрытие диалога и правила выбора стартового visibleMonth: selected month или текущий месяц.",
+      "acceptance_criteria": [
+        "При открытии без value показывается текущий месяц, а при наличии value — месяц выбранной даты.",
+        "Выбор месяца для открытия не прыгает к ближайшей допустимой дате."
+      ],
+      "test_steps": [
+        "Шаг 1: связать trigger с открытием и закрытием диалога.",
+        "Шаг 2: проверить открытие при value = null, при выбранной дате и при value вне диапазона.",
+        "Шаг 3: ожидаемый результат — visibleMonth определяется предсказуемо по PRD."
+      ],
+      "dependencies": [
+        "TASK-014",
+        "TASK-015"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-017",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Реализовать внутренний temporary input state и синхронизацию черновика с внешним value без конфликтов controlled-поведения.",
+      "acceptance_criteria": [
+        "Пока пользователь печатает, raw input может расходиться с value без потери controlled-модели.",
+        "Внешнее обновление value синхронизирует input по явным правилам и не затирает активный черновик неожиданно."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать useDatePickerInput или эквивалентный hook для rawInputValue, dirty/focused состояния и sync-правил.",
+        "Шаг 2: проверить сценарии внешнего изменения value во время и вне активного ввода.",
+        "Шаг 3: ожидаемый результат — input draft и selected value больше не конфликтуют."
+      ],
+      "dependencies": [
+        "TASK-008",
+        "TASK-011",
+        "TASK-014"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-018",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать правила ручного ввода: valid date вызывает onChange(Date), полная очистка вызывает onChange(null), невалидный текст остаётся в поле.",
+      "acceptance_criteria": [
+        "onChange срабатывает только для валидной полной даты или полного очищения поля.",
+        "Невалидная и частичная строка не стирается автоматически после blur."
+      ],
+      "test_steps": [
+        "Шаг 1: связать parse/format/validation с временным состоянием input.",
+        "Шаг 2: проверить валидный ввод, полную очистку, частичный ввод и невалидную дату.",
+        "Шаг 3: ожидаемый результат — ручной ввод работает стабильно и не ломает controlled API."
+      ],
+      "dependencies": [
+        "TASK-017"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-019",
+      "category": "integration",
+      "priority": "high",
+      "description": "Реализовать показ ошибок на blur и после внешнего invalid/submit сигнала с корректным скрытием ошибки во время активного набора.",
+      "acceptance_criteria": [
+        "Ошибка появляется после blur или внешней формы, но не мигает во время активного набора.",
+        "При исправлении значения ошибка очищается и aria-invalid возвращается в нормальное состояние."
+      ],
+      "test_steps": [
+        "Шаг 1: связать validation layer с input blur и внешним invalid состоянием.",
+        "Шаг 2: проверить сценарии blur с невалидной датой, required и внешней ошибкой формы.",
+        "Шаг 3: ожидаемый результат — пользователь видит ровно одну актуальную ошибку в нужный момент."
+      ],
+      "dependencies": [
+        "TASK-011",
+        "TASK-017",
+        "TASK-018"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-020",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Реализовать выбор даты кликом по ячейке и мгновенное закрытие календаря без кнопок OK/Cancel.",
+      "acceptance_criteria": [
+        "Клик по доступной дате сразу вызывает onChange и закрывает диалог.",
+        "В UI отсутствуют отдельные кнопки подтверждения или отмены выбора."
+      ],
+      "test_steps": [
+        "Шаг 1: подключить обработчик выбора даты к CalendarDayCell.",
+        "Шаг 2: проверить выбор доступной даты и автоматическое закрытие диалога.",
+        "Шаг 3: ожидаемый результат — дата устанавливается в один шаг, без лишнего подтверждения."
+      ],
+      "dependencies": [
+        "TASK-015",
+        "TASK-016",
+        "TASK-017"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-021",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Реализовать keyboard engine для grid: Arrow keys, Home/End, PageUp/PageDown, Shift+PageUp/PageDown, Enter, Space, Escape.",
+      "acceptance_criteria": [
+        "Есть отдельная логика вычисления следующей focusedDate и действий по каждой поддерживаемой клавише.",
+        "Keyboard engine не зашит в JSX и покрывает месячные и годовые переходы."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать useDatePickerKeyboard или equivalent слой логики с маппингом клавиш на действия.",
+        "Шаг 2: проверить перемещение по неделям, месяцам и годам через все поддерживаемые комбинации.",
+        "Шаг 3: ожидаемый результат — клавиатурная навигация определена централизованно и предсказуемо."
+      ],
+      "dependencies": [
+        "TASK-006",
+        "TASK-013"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-022",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Подключить keyboard engine к calendar grid, включая Enter/Space для выбора даты и Escape для закрытия диалога.",
+      "acceptance_criteria": [
+        "Пользователь может выбрать дату полностью с клавиатуры без мыши.",
+        "Escape закрывает диалог, а Enter/Space выбирают активную дату по тем же правилам, что и клик."
+      ],
+      "test_steps": [
+        "Шаг 1: связать обработчики onKeyDown с grid и active day cell.",
+        "Шаг 2: проверить навигацию, выбор даты клавиатурой и закрытие по Escape.",
+        "Шаг 3: ожидаемый результат — keyboard-only сценарий работает end-to-end."
+      ],
+      "dependencies": [
+        "TASK-020",
+        "TASK-021"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-023",
+      "category": "integration",
+      "priority": "critical",
+      "description": "Реализовать focus trap и стартовый фокус при открытии: selected date, а если её нет — today.",
+      "acceptance_criteria": [
+        "Пока диалог открыт, табуляция не уводит фокус за его пределы.",
+        "При открытии фокус попадает на выбранную дату или на сегодняшнюю дату согласно PRD."
+      ],
+      "test_steps": [
+        "Шаг 1: реализовать hook/логику focus management внутри диалога.",
+        "Шаг 2: проверить открытие с выбранной датой и без неё, а также циклическую табуляцию.",
+        "Шаг 3: ожидаемый результат — фокус ведёт себя детерминированно и не теряется."
+      ],
+      "dependencies": [
+        "TASK-016",
+        "TASK-015"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-024",
+      "category": "integration",
+      "priority": "high",
+      "description": "Реализовать возврат фокуса на trigger после закрытия и защиту от blur → reopen loop при повторном нажатии на trigger.",
+      "acceptance_criteria": [
+        "После закрытия любым способом фокус возвращается на кнопку-триггер.",
+        "Повторное нажатие на trigger корректно закрывает открытый диалог без мигания и повторного открытия."
+      ],
+      "test_steps": [
+        "Шаг 1: связать close-сценарии с возвратом фокуса на trigger.",
+        "Шаг 2: проверить закрытие по Escape, внешнему клику, выбору даты и повторному клику по trigger.",
+        "Шаг 3: ожидаемый результат — lifecycle диалога не создаёт focus regressions."
+      ],
+      "dependencies": [
+        "TASK-023",
+        "TASK-020"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-025",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Интегрировать minDate/maxDate/disabledDates в выбор и навигацию: недоступные даты не меняют value, а фокус остаётся стабильным.",
+      "acceptance_criteria": [
+        "Попытка выбрать недоступную дату не вызывает onChange и не изменяет selected value.",
+        "При попытке взаимодействия с недоступной датой фокус остаётся на текущей управляемой ячейке без агрессивной ошибки."
+      ],
+      "test_steps": [
+        "Шаг 1: связать range/disabled helpers с обработчиками выбора и вычислением доступности ячеек.",
+        "Шаг 2: проверить даты вне диапазона, из disabledDates и запрещённые предикатом.",
+        "Шаг 3: ожидаемый результат — ограниченные даты безопасно блокируются и остаются семантически недоступными."
+      ],
+      "dependencies": [
+        "TASK-007",
+        "TASK-020",
+        "TASK-022"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-026",
+      "category": "ui",
+      "priority": "high",
+      "description": "Отрисовать состояния day cells: selected, unavailable, focused и outsideMonth, сохранив ровную сетку и понятные визуальные различия.",
+      "acceptance_criteria": [
+        "Ячейки дат одинакового размера и визуально различают выбранное, активное и недоступное состояние.",
+        "Дни вне текущего месяца и недоступные даты имеют отдельные CSS-состояния без нарушения layout."
+      ],
+      "test_steps": [
+        "Шаг 1: расширить CalendarDayCell и стили под состояния selected/focused/disabled/outsideMonth.",
+        "Шаг 2: открыть месяц с комбинацией доступных и недоступных дней и пройти навигацию клавиатурой.",
+        "Шаг 3: ожидаемый результат — сетка остаётся ровной, а состояния читаемы визуально."
+      ],
+      "dependencies": [
+        "TASK-015",
+        "TASK-025"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-027",
+      "category": "integration",
+      "priority": "high",
+      "description": "Интегрировать locale во весь компонент: подписи, озвучивание, формат отображения и первый день недели.",
+      "acceptance_criteria": [
+        "Изменение locale обновляет month label, weekday labels, aria-тексты и формат отображаемого значения.",
+        "Первый день недели в grid соответствует выбранной локали."
+      ],
+      "test_steps": [
+        "Шаг 1: прокинуть locale через input formatting, i18n helpers и рендер календаря.",
+        "Шаг 2: переключить минимум две локали и сравнить заголовки, дни недели и spoken labels.",
+        "Шаг 3: ожидаемый результат — локализация влияет на все заявленные слои, а не только на видимый текст."
+      ],
+      "dependencies": [
+        "TASK-009",
+        "TASK-010",
+        "TASK-015",
+        "TASK-017"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-028",
+      "category": "ui",
+      "priority": "high",
+      "description": "Доработать responsive/mobile и visual accessibility: адаптивная ширина dialog, крупные tappable areas, явный focus и контраст AA.",
+      "acceptance_criteria": [
+        "Dialog адаптируется по ширине экрана и остаётся usable на узких viewport без отдельного mobile-mode.",
+        "Фокусное состояние явно видно, а базовые цвета и контраст соответствуют цели WCAG AA."
+      ],
+      "test_steps": [
+        "Шаг 1: доработать CSS Modules для responsive dialog, touch-friendly control sizes и focus-visible состояний.",
+        "Шаг 2: проверить компонент на узком viewport и пройти сценарий клавиатурной навигации.",
+        "Шаг 3: ожидаемый результат — компонент остаётся читаемым и интерактивным на desktop и mobile ширинах."
+      ],
+      "dependencies": [
+        "TASK-026"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-029",
+      "category": "security",
+      "priority": "high",
+      "description": "Провести security-hardening UI: исключить dangerouslySetInnerHTML, production console logging и любые сетевые side effects внутри компонента.",
+      "acceptance_criteria": [
+        "Ошибки, подсказки и aria-тексты рендерятся как обычный текст без HTML-инъекций.",
+        "Компонент не содержит сетевых запросов и не логирует пользовательский ввод в production-коде."
+      ],
+      "test_steps": [
+        "Шаг 1: проверить весь компонент и helpers на отсутствие dangerouslySetInnerHTML, fetch/XHR и console-логов пользовательского ввода.",
+        "Шаг 2: заменить небезопасные места на безопасный текстовый рендер и убрать side effects.",
+        "Шаг 3: ожидаемый результат — компонент соответствует безопасному локальному UI-поведению из PRD."
+      ],
+      "dependencies": [
+        "TASK-014",
+        "TASK-015",
+        "TASK-017"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-030",
+      "category": "security",
+      "priority": "high",
+      "description": "Провести date-only hardening: убрать timestamp-sensitive сравнения и мутацию Date из всей кодовой базы компонента.",
+      "acceptance_criteria": [
+        "Логика выбора и валидации использует только выделенные date-only helpers.",
+        "В коде компонента нет критичных прямых setMonth/setDate/setFullYear мутаций и raw timestamp equality."
+      ],
+      "test_steps": [
+        "Шаг 1: просмотреть все места работы с датами в компоненте и hooks.",
+        "Шаг 2: заменить прямые timestamp-сравнения и мутации на pure helpers из lib/date.",
+        "Шаг 3: ожидаемый результат — поведение не ломается из-за timezone shifts и побочных мутаций."
+      ],
+      "dependencies": [
+        "TASK-004",
+        "TASK-006",
+        "TASK-007",
+        "TASK-014"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-031",
+      "category": "functional",
+      "priority": "high",
+      "description": "Реализовать обязательную a11y-семантику input/trigger/dialog/grid/day cells и live region по APG-паттерну.",
+      "acceptance_criteria": [
+        "Dialog имеет role=\"dialog\" и aria-modal=\"true\", grid использует корректную семантику, а selected/unavailable состояния озвучиваемы.",
+        "input получает корректные aria-describedby и aria-invalid только в ошибочном состоянии."
+      ],
+      "test_steps": [
+        "Шаг 1: подключить a11y helpers к input, trigger, dialog, grid и day cells.",
+        "Шаг 2: проверить aria-label, aria-selected, aria-disabled и live region на реальном DOM.",
+        "Шаг 3: ожидаемый результат — базовая семантика доступности собрана централизованно и соответствует PRD."
+      ],
+      "dependencies": [
+        "TASK-010",
+        "TASK-015",
+        "TASK-019",
+        "TASK-025"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-032",
+      "category": "infrastructure",
+      "priority": "high",
+      "description": "Добавить unit-тесты для date helpers: нормализация, сравнение, range/disabled и month matrix.",
+      "acceptance_criteria": [
+        "Unit-тесты покрывают ключевые pure helpers lib/date, включая граничные случаи месяца и диапазона.",
+        "Тесты фиксируют date-only поведение и защищают от timezone regressions на уровне логики."
+      ],
+      "test_steps": [
+        "Шаг 1: написать tests для normalizeDate, compare helpers, buildMonthMatrix и range/disabled helpers.",
+        "Шаг 2: прогнать тесты на граничных датах, високосном годе и разном времени суток.",
+        "Шаг 3: ожидаемый результат — чистая date-логика покрыта автоматическими тестами."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006",
+        "TASK-007"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-033",
+      "category": "infrastructure",
+      "priority": "high",
+      "description": "Добавить unit-тесты для input/i18n/a11y/validation helpers.",
+      "acceptance_criteria": [
+        "Тесты покрывают parse/format/sanitize, генерацию aria-текстов и приоритет ошибок.",
+        "Есть проверки минимум для двух локалей и для конкурирующих сценариев ошибок."
+      ],
+      "test_steps": [
+        "Шаг 1: написать tests для lib/input, lib/i18n, lib/a11y и validation helpers.",
+        "Шаг 2: проверить валидный и невалидный ввод, spoken labels и порядок ошибок.",
+        "Шаг 3: ожидаемый результат — не-UI логика компонента покрыта unit-уровнем."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-008",
+        "TASK-009",
+        "TASK-010",
+        "TASK-011"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-034",
+      "category": "integration",
+      "priority": "high",
+      "description": "Добавить integration-тесты для controlled sync, ручного ввода, очистки до null и blur-валидации.",
+      "acceptance_criteria": [
+        "Тесты подтверждают controlled-only поведение при внешнем value и внутреннем черновике.",
+        "Покрыты сценарии валидного ввода, очистки, невалидной строки и показа ошибки после blur."
+      ],
+      "test_steps": [
+        "Шаг 1: отрендерить DatePicker в тестах с управляемым внешним state.",
+        "Шаг 2: пройти сценарии ручного набора, blur и внешнего изменения value.",
+        "Шаг 3: ожидаемый результат — синхронизация value и raw input защищена тестами."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-018",
+        "TASK-019"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-035",
+      "category": "integration",
+      "priority": "high",
+      "description": "Добавить integration-тесты для keyboard navigation, смены месяца и выбора даты без мыши.",
+      "acceptance_criteria": [
+        "Тесты покрывают стрелки, Home/End, PageUp/PageDown, Shift+PageUp/Down, Enter/Space и Escape.",
+        "Пользовательский сценарий keyboard-only выбора даты подтверждён end-to-end."
+      ],
+      "test_steps": [
+        "Шаг 1: открыть диалог в тестах и смоделировать полную клавиатурную навигацию.",
+        "Шаг 2: проверить переходы между днями, месяцами и годами, а также выбор даты и закрытие.",
+        "Шаг 3: ожидаемый результат — доступный keyboard flow стабильно работает под тестами."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-022"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-036",
+      "category": "integration",
+      "priority": "high",
+      "description": "Добавить integration-тесты для focus lifecycle: initial focus, focus trap, return to trigger и отсутствие flicker.",
+      "acceptance_criteria": [
+        "Покрыты открытия с value и без value, табуляция внутри диалога и возврат фокуса после закрытия.",
+        "Есть отдельная проверка на повторный клик по trigger без blur/reopen loop."
+      ],
+      "test_steps": [
+        "Шаг 1: написать тесты для открытия/закрытия и поведения focus trap.",
+        "Шаг 2: проверить close по Escape, выбору даты, внешнему клику и повторному клику по trigger.",
+        "Шаг 3: ожидаемый результат — focus-management регрессии ловятся автоматически."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-023",
+        "TASK-024"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-037",
+      "category": "integration",
+      "priority": "high",
+      "description": "Добавить integration-тесты для ограничений выбора: min/max, disabledDates, out-of-range initial value и locale.",
+      "acceptance_criteria": [
+        "Покрыты сценарии семантической недоступности, запрета onChange и открытия месяца out-of-range value.",
+        "Изменение locale проверяется не только визуально, но и через первый день недели и aria-тексты."
+      ],
+      "test_steps": [
+        "Шаг 1: написать тесты для диапазонов, disabled date и открытия месяца установленной вне диапазона даты.",
+        "Шаг 2: переключить locale и проверить weekday row, month label и озвучиваемые подписи.",
+        "Шаг 3: ожидаемый результат — ограничения и локализация защищены интеграционными тестами."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-025",
+        "TASK-027",
+        "TASK-031"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-038",
+      "category": "integration",
+      "priority": "medium",
+      "description": "Добавить автоматические accessibility-тесты: axe-core, aria-атрибуты, live region и ошибка input.",
+      "acceptance_criteria": [
+        "Есть тесты на отсутствие базовых axe-нарушений в ключевых состояниях компонента.",
+        "Проверяются aria-invalid, aria-describedby, aria-selected, aria-modal и live region announcements."
+      ],
+      "test_steps": [
+        "Шаг 1: написать a11y-тесты для пустого состояния, выбранной даты и ошибочного состояния.",
+        "Шаг 2: запустить axe-core и отдельные DOM-assertions на aria-атрибуты.",
+        "Шаг 3: ожидаемый результат — автоматическая a11y-проверка фиксирует критичные регрессии."
+      ],
+      "dependencies": [
+        "TASK-003",
+        "TASK-031"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-039",
+      "category": "integration",
+      "priority": "medium",
+      "description": "Подготовить manual QA checklist для keyboard, screen reader и mobile проверок по матрице из PRD.",
+      "acceptance_criteria": [
+        "Есть документированный чеклист для NVDA + Firefox/Chrome, VoiceOver + Safari, Safari iOS и Chrome Android.",
+        "Чеклист покрывает keyboard flow, focus, live region, ошибки и mobile usability."
+      ],
+      "test_steps": [
+        "Шаг 1: составить список ручных сценариев на основе разделов 11–12 PRD.",
+        "Шаг 2: разбить сценарии по desktop keyboard, screen reader и mobile browser матрице.",
+        "Шаг 3: ожидаемый результат — команда может одинаково прогонять ручную регрессию перед релизом."
+      ],
+      "dependencies": [
+        "TASK-031",
+        "TASK-028",
+        "TASK-038"
+      ],
+      "status": "pending"
+    }
+  ]
+}
