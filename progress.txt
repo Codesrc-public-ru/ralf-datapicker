@@ -218,4 +218,7 @@ Validation note: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run b
 TASK-033 done.
 Added helper unit coverage for input, i18n, a11y, and validation layers.
 New tests hit sanitize/parse/format, two locales, aria text builders, and validation priority in real runtime checks.
+TASK-037 done.
+Added integration coverage for min/max bounds, disabledDates, out-of-range initial month, and locale weekday order.
+Verified `npm run lint`, `npm run typecheck`, `node scripts/run-date-picker-tests.mjs integration`, and `npm test`.
 Validation note: `npm run test:unit`, `npm run lint`, and `npm run typecheck` passed.

@@ -5,6 +5,9 @@ const { getDayAriaLabel: getDayAriaLabelForDomStack } = requireSource(
 const { getMonthYearLabel: getMonthYearLabelForDomStack } = requireSource(
   'src/components/date-picker/lib/i18n/getMonthYearLabel.ts'
 );
+const { getWeekdayNames: getWeekdayNamesForDomStack } = requireSource(
+  'src/components/date-picker/lib/i18n/getWeekdayNames.ts'
+);
 const { getTriggerAriaLabel: getTriggerAriaLabelForDomStack } = requireSource(
   'src/components/date-picker/lib/a11y/getTriggerAriaLabel.ts'
 );
@@ -15,7 +18,9 @@ describe('DatePicker DOM stack', () => {
     disabledDates = [],
     initialValue = null,
     invalid = false,
-    locale = 'en-US'
+    locale = 'en-US',
+    maxDate = null,
+    minDate = null
   } = {}) {
     const changeCalls = [];
 
@@ -27,6 +32,8 @@ describe('DatePicker DOM stack', () => {
         invalid,
         locale,
         disabledDates,
+        maxDate,
+        minDate,
         onChange(nextValue) {
           changeCalls.push(nextValue);
           setValue(nextValue);
@@ -35,6 +42,7 @@ describe('DatePicker DOM stack', () => {
       });
     }
 
+    await cleanup();
     const view = await render(React.createElement(ControlledDatePicker));
 
     return {
@@ -42,6 +50,97 @@ describe('DatePicker DOM stack', () => {
       ...view
     };
   }
+
+  test('keeps min and max dates unavailable and blocks selection changes', async () => {
+    const { changeCalls } = await renderControlledDatePicker({
+      initialValue: new Date(2026, 4, 12),
+      locale: 'en-US',
+      maxDate: new Date(2026, 4, 20),
+      minDate: new Date(2026, 4, 10)
+    });
+
+    const trigger = screen.getByRole('button', {
+      name: getTriggerAriaLabelForDomStack(new Date(2026, 4, 12), 'en-US')
+    });
+
+    await user.click(trigger);
+
+    const beforeMinButton = screen.getByRole('button', {
+      name: getDayAriaLabelForDomStack(new Date(2026, 4, 9), {
+        locale: 'en-US',
+        unavailable: true
+      })
+    });
+    const afterMaxButton = screen.getByRole('button', {
+      name: getDayAriaLabelForDomStack(new Date(2026, 4, 21), {
+        locale: 'en-US',
+        unavailable: true
+      })
+    });
+
+    expect(beforeMinButton).toBeDisabled();
+    expect(afterMaxButton).toBeDisabled();
+
+    await user.click(beforeMinButton);
+    await user.click(afterMaxButton);
+
+    expect(changeCalls).toHaveLength(0);
+    expect(screen.getByLabelText('Date')).toHaveValue('12.05.2026');
+    expect(screen.getByRole('dialog')).toBeVisible();
+  });
+
+  test('keeps disabledDates unavailable and blocks selection changes', async () => {
+    const { changeCalls } = await renderControlledDatePicker({
+      disabledDates: [new Date(2026, 4, 13)],
+      initialValue: new Date(2026, 4, 12),
+      locale: 'en-US'
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: getTriggerAriaLabelForDomStack(new Date(2026, 4, 12), 'en-US')
+      })
+    );
+
+    const unavailableButton = screen.getByRole('button', {
+      name: getDayAriaLabelForDomStack(new Date(2026, 4, 13), {
+        locale: 'en-US',
+        unavailable: true
+      })
+    });
+
+    expect(unavailableButton).toBeDisabled();
+    expect(unavailableButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.click(unavailableButton);
+
+    expect(changeCalls).toHaveLength(0);
+    expect(screen.getByLabelText('Date')).toHaveValue('12.05.2026');
+    expect(screen.getByRole('dialog')).toBeVisible();
+  });
+
+  test('opens the month for an out-of-range value and uses locale specific labels', async () => {
+    await renderControlledDatePicker({
+      initialValue: new Date(2026, 0, 15),
+      locale: 'de-DE',
+      maxDate: new Date(2026, 11, 31),
+      minDate: new Date(2026, 4, 1)
+    });
+
+    const trigger = screen.getByRole('button', {
+      name: getTriggerAriaLabelForDomStack(new Date(2026, 0, 15), 'de-DE')
+    });
+
+    await user.click(trigger);
+
+    expect(screen.getByText(getMonthYearLabelForDomStack(new Date(2026, 0, 1), 'de-DE'))).toBeInTheDocument();
+    expect(
+      Array.from(document.querySelectorAll('th')).map((header) =>
+        header.textContent?.trim() ?? ''
+      ).join(',')
+    ).toBe(getWeekdayNamesForDomStack('de-DE').join(','));
+    expect(screen.getByRole('dialog')).toBeVisible();
+  });
 
   test('renders user-event friendly flow with controlled sync and focus trap', async () => {
     await renderControlledDatePicker({
