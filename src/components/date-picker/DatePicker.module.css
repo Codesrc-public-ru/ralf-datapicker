@@ -1,1 +1,53 @@
+.root {
+  display: block;
+}
 
+.field {
+  display: flex;
+}
+
+.trigger {
+  display: inline-flex;
+}
+
+.dialog {
+  position: relative;
+}
+
+.header {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.cell {
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+}
+
+.selected {
+  font-weight: 700;
+}
+
+.focused {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.outsideMonth {
+  opacity: 0.4;
+}
+
+.invalid {
+  border-color: currentColor;
+}
+
+.error {
+  display: block;
+}
