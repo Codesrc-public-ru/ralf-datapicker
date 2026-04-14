@@ -1,3 +1,9 @@
+TASK-040 done.
+ESLint gate already exist in `eslint.config.cjs`.
+It covers source and test files for TypeScript, React, hooks, import order, and jsx-a11y rules.
+`npm run lint` pass.
+TASK status now done.
+
 TASK-021 done.
 Keyboard engine now lives in `src/components/date-picker/model/useDatePickerKeyboard.ts`.
 It resolves Arrow keys, Home/End, PageUp/PageDown, Shift+PageUp/Down, Enter, Space, and Escape into calendar actions.
