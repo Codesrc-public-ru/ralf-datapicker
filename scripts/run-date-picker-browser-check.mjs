@@ -19,18 +19,25 @@ if (!allowedModes.has(mode)) {
 
 const chromiumExecutable = findChromiumExecutable();
 const browserBundle = buildBrowserBundle(rootDir);
-const htmlPath = writeBrowserHtml(browserBundle);
-const chromiumResult = runChromium(chromiumExecutable, htmlPath);
+const htmlPath = writeBrowserHtml(rootDir, browserBundle);
+const desktopChromiumResult = runChromium(chromiumExecutable, htmlPath, ['--window-size=1280,900']);
+const mobileChromiumResult = runChromium(chromiumExecutable, htmlPath, ['--window-size=390,844']);
 
-if (chromiumResult.status === 0) {
-  const result = parseBrowserResult(chromiumResult.stdout);
+if (desktopChromiumResult.status === 0 && mobileChromiumResult.status === 0) {
+  const desktopResult = parseBrowserResult(desktopChromiumResult.stdout);
+  const mobileResult = parseBrowserResult(mobileChromiumResult.stdout);
 
-  if (result.status !== 'pass') {
-    console.error(result.message);
+  if (desktopResult.status !== 'pass') {
+    console.error(desktopResult.message);
     process.exit(1);
   }
 
-  console.log(`ok browser checks: ${result.summary}`);
+  if (mobileResult.status !== 'pass') {
+    console.error(mobileResult.message);
+    process.exit(1);
+  }
+
+  console.log(`ok browser checks: ${desktopResult.summary}; ${mobileResult.summary}`);
   process.exit(0);
 }
 
@@ -115,14 +122,19 @@ function toModuleId(rootDir, absolutePath) {
   return path.relative(rootDir, absolutePath).replaceAll(path.sep, '/');
 }
 
-function writeBrowserHtml(browserBundle) {
+function writeBrowserHtml(rootDir, browserBundle) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'date-picker-browser-check-'));
   const htmlPath = path.join(tempDir, 'index.html');
+  const componentCss = fs.readFileSync(
+    path.join(rootDir, 'src/components/date-picker/DatePicker.module.css'),
+    'utf8'
+  );
   const html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>DatePicker browser checks</title>
+  <style>${componentCss.replaceAll('<', '\\u003c')}</style>
 </head>
 <body>
   <div id="root"></div>
@@ -195,11 +207,51 @@ function writeBrowserHtml(browserBundle) {
           'button',
           getDayAriaLabel(new Date(2026, 4, 12), { locale: 'en-US', selected: true })
         );
+        const field = document.querySelector('.field');
+        const input = document.querySelector('input');
+        const triggerButton = trigger;
+
+        if (!field || !input) {
+          throw new Error('responsive shell should render field and input nodes');
+        }
 
         if (document.activeElement !== selectedDay) {
           throw new Error('selected day should receive initial focus');
         }
         payload.summary.push('initial focus lands on selected day');
+
+        if (window.innerWidth <= 520) {
+          const fieldStyle = getComputedStyle(field);
+          const dialogRect = dialog.getBoundingClientRect();
+          const inputRect = input.getBoundingClientRect();
+          const triggerRect = triggerButton.getBoundingClientRect();
+
+          if (fieldStyle.flexDirection !== 'column') {
+            throw new Error('mobile field should stack input and trigger');
+          }
+
+          if (inputRect.height < 44 || triggerRect.height < 44) {
+            throw new Error('mobile controls should stay touch friendly');
+          }
+
+          if (triggerRect.width < inputRect.width * 0.9) {
+            throw new Error('mobile trigger should span the field width');
+          }
+
+          if (dialogRect.width > window.innerWidth) {
+            throw new Error('mobile dialog should fit the viewport');
+          }
+
+          payload.summary.push('mobile layout stacks controls and fits viewport');
+        } else {
+          const fieldStyle = getComputedStyle(field);
+
+          if (fieldStyle.flexDirection !== 'row') {
+            throw new Error('desktop field should keep inline layout');
+          }
+
+          payload.summary.push('desktop layout keeps inline controls');
+        }
 
         if (${JSON.stringify(mode)} !== 'flow') {
           const openA11y = await axe.run(document, { resultTypes: ['violations'] });
@@ -237,8 +289,8 @@ function writeBrowserHtml(browserBundle) {
         nextDay.click();
         await flush();
 
-        const input = document.querySelector('input');
-        if (input.value !== formatInputDate(new Date(2026, 4, 13))) {
+        const selectedInput = document.querySelector('input');
+        if (selectedInput.value !== formatInputDate(new Date(2026, 4, 13))) {
           throw new Error('selection should update controlled value');
         }
         if (changeCalls.length !== 1) {
@@ -413,7 +465,7 @@ function escapeHtml(value) {
   return value;
 }
 
-function runChromium(chromiumExecutable, htmlPath) {
+function runChromium(chromiumExecutable, htmlPath, extraArgs = []) {
   return spawnSync(
     chromiumExecutable,
     [
@@ -426,6 +478,7 @@ function runChromium(chromiumExecutable, htmlPath) {
       '--disable-dev-shm-usage',
       '--run-all-compositor-stages-before-draw',
       '--virtual-time-budget=8000',
+      ...extraArgs,
       '--dump-dom',
       pathToFileUrl(htmlPath)
     ],

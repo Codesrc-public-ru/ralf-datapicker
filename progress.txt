@@ -167,3 +167,8 @@ Added live region support to DatePicker with `role="status"` and `aria-live="pol
 Selection and open flows now keep centralized a11y helpers in use, and DOM coverage checks the live region on open.
 Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
 Next step: TASK-028 if responsive/mobile accessibility is next.
+
+TASK-028 done.
+DatePicker styles now adapt for narrow viewports with stacked field controls, full-width dialog, larger touch targets, and explicit focus-visible rings.
+Browser check script now loads the DatePicker CSS and verifies desktop/mobile responsive layout when Chromium is available.
+Validation note: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` passed. Chromium browser check blocked here, so the script used DOM fallback.

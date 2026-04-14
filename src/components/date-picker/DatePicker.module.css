@@ -1,43 +1,61 @@
 .root {
   display: block;
+  width: 100%;
+  max-inline-size: 100%;
 }
 
 .field {
   display: flex;
   align-items: stretch;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .input {
   flex: 1 1 auto;
   min-inline-size: 0;
-  min-block-size: 2.5rem;
-  padding: 0 0.75rem;
+  min-block-size: 2.75rem;
+  padding: 0 0.875rem;
   border: 1px solid currentColor;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: canvas;
   color: inherit;
+  box-sizing: border-box;
 }
 
-.input:focus {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+.input:focus-visible {
+  outline: 3px solid rgba(243, 184, 111, 0.95);
+  outline-offset: 3px;
 }
 
 .trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-block-size: 2.5rem;
-  min-inline-size: 2.5rem;
+  min-block-size: 2.75rem;
+  min-inline-size: 2.75rem;
+  padding-inline: 0.875rem;
+  border: 1px solid currentColor;
+  border-radius: 0.75rem;
+  background: canvas;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+.trigger:focus-visible {
+  outline: 3px solid rgba(243, 184, 111, 0.95);
+  outline-offset: 3px;
 }
 
 .dialog {
   position: relative;
+  inline-size: min(100%, 24rem);
+  margin-block-start: 0.75rem;
   padding: 1rem;
   border: 1px solid currentColor;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   background: canvas;
+  box-sizing: border-box;
 }
 
 .header {
@@ -55,6 +73,7 @@
 .headerActions {
   display: inline-flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .grid {
@@ -76,13 +95,14 @@
 .weekday {
   padding-block: 0.5rem;
   font-weight: 600;
+  font-size: 0.875rem;
   text-align: center;
 }
 
 .cell {
-  min-inline-size: 2.5rem;
-  min-block-size: 2.5rem;
-  padding: 0.125rem;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  padding: 0.1875rem;
   text-align: center;
   vertical-align: middle;
 }
@@ -92,8 +112,8 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-inline-size: 2.5rem;
-  min-block-size: 2.5rem;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
@@ -105,6 +125,11 @@
     box-shadow 120ms ease,
     color 120ms ease,
     opacity 120ms ease;
+}
+
+.dayButton:focus-visible {
+  outline: 3px solid rgba(243, 184, 111, 0.95);
+  outline-offset: 2px;
 }
 
 .selected {
@@ -142,6 +167,8 @@
 .error {
   display: block;
   margin-block-start: 0.5rem;
+  min-block-size: 1.25rem;
+  line-height: 1.4;
   color: currentColor;
 }
 
@@ -156,4 +183,40 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+@media (max-width: 520px) {
+  .field {
+    flex-direction: column;
+  }
+
+  .input,
+  .trigger {
+    inline-size: 100%;
+  }
+
+  .dialog {
+    inline-size: 100%;
+    padding: 0.75rem;
+    border-radius: 0.875rem;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .headerActions > * {
+    flex: 1 1 8.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dayButton {
+    transition: none;
+  }
 }
