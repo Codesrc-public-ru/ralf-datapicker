@@ -42,6 +42,9 @@ describe('Keyboard integration scaffold', () => {
 
     expect(source).toContain('useDatePickerKeyboard');
     expect(source).toContain('resolveKeyboardNavigation');
+    expect(source).toContain('handleGridKeyDown');
+    expect(source).toContain('handleDayFocus');
+    expect(source).toContain('registerDayButton');
     expect(source).toContain('moveDateByDays');
     expect(source).toContain('moveDateByWeeks');
     expect(source).toContain('getHomeDate');
@@ -50,6 +53,16 @@ describe('Keyboard integration scaffold', () => {
     expect(source).toContain('getPageDownDate');
     expect(source).toContain('getShiftPageUpDate');
     expect(source).toContain('getShiftPageDownDate');
+  });
+
+  test('wires keyboard handling into the calendar grid and day cells', () => {
+    const source = dp.read('src/components/date-picker/DatePicker.tsx');
+
+    expect(source).toContain('const keyboardState = useDatePickerKeyboard({');
+    expect(source).toContain('onKeyDown={keyboardState.handleGridKeyDown}');
+    expect(source).toContain('onFocus: keyboardState.handleDayFocus(day)');
+    expect(source).toContain('ref: keyboardState.registerDayButton(day)');
+    expect(source).toContain('tabIndex: focused ? 0 : -1');
   });
 
   test('maps every supported key to the expected calendar action', () => {

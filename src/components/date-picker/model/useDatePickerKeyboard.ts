@@ -1,3 +1,6 @@
+import { useCallback, useEffect, useRef } from 'react';
+
+import { selectDate } from './useDatePickerSelection';
 import { KEYBOARD_KEYS } from '../constants/keyboard';
 import {
   getEndDate,
@@ -9,6 +12,11 @@ import {
   moveDateByDays,
   moveDateByWeeks
 } from '../lib/date/navigation';
+import { normalizeDate } from '../lib/date/normalizeDate';
+
+import type { DatePickerStateController } from '../types/internal.types';
+import type { DatePickerProps } from '../types/public.types';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 
 interface KeyboardNavigationOptions {
   firstDayOfWeek?: number;
@@ -22,12 +30,33 @@ interface KeyboardNavigationResolution {
   shouldCloseDialog: boolean;
 }
 
+export interface DatePickerKeyboardController {
+  handleGridKeyDown: (event: ReactKeyboardEvent<HTMLTableElement>) => void;
+  handleDayFocus: (date: Date) => () => void;
+  registerDayButton: (date: Date) => (element: HTMLButtonElement | null) => void;
+}
+
+interface DatePickerKeyboardOptions {
+  controller: DatePickerStateController;
+  closeDialog: () => void;
+  disabledDates?: DatePickerProps['disabledDates'];
+  firstDayOfWeek?: number;
+  maxDate?: DatePickerProps['maxDate'];
+  minDate?: DatePickerProps['minDate'];
+  onChange: DatePickerProps['onChange'];
+}
+
 const createNeutralResolution = (): KeyboardNavigationResolution => ({
   action: 'noop',
   nextFocusedDate: null,
   shouldSelectFocusedDate: false,
   shouldCloseDialog: false
 });
+
+const getDateKey = (date: Date): string =>
+  `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+const getMonthStart = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), 1);
 
 export const resolveKeyboardNavigation = (
   key: string,
@@ -83,9 +112,7 @@ export const resolveKeyboardNavigation = (
     case KEYBOARD_KEYS.PAGE_UP:
       return {
         action: 'move-focus',
-        nextFocusedDate: shiftKey
-          ? getShiftPageUpDate(focusedDate)
-          : getPageUpDate(focusedDate),
+        nextFocusedDate: shiftKey ? getShiftPageUpDate(focusedDate) : getPageUpDate(focusedDate),
         shouldSelectFocusedDate: false,
         shouldCloseDialog: false
       };
@@ -118,10 +145,121 @@ export const resolveKeyboardNavigation = (
   }
 };
 
-export default function useDatePickerKeyboard(_props: unknown): { lastKeyPressed: null } {
-  void _props;
+export default function useDatePickerKeyboard({
+  controller,
+  closeDialog,
+  disabledDates,
+  firstDayOfWeek = 0,
+  maxDate,
+  minDate,
+  onChange
+}: DatePickerKeyboardOptions): DatePickerKeyboardController {
+  const dayButtonRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  const focusDayButton = useCallback((date: Date | null) => {
+    if (!date) {
+      return;
+    }
+
+    const button = dayButtonRefs.current.get(getDateKey(date));
+
+    if (!button) {
+      return;
+    }
+
+    button.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!controller.state.isOpen || !controller.state.focusedDate) {
+      return;
+    }
+
+    focusDayButton(controller.state.focusedDate);
+  }, [controller.state.focusedDate, controller.state.isOpen, focusDayButton]);
+
+  const registerDayButton = useCallback(
+    (date: Date) => (element: HTMLButtonElement | null) => {
+      const key = getDateKey(normalizeDate(date));
+
+      if (element) {
+        dayButtonRefs.current.set(key, element);
+        return;
+      }
+
+      dayButtonRefs.current.delete(key);
+    },
+    []
+  );
+
+  const handleDayFocus = useCallback(
+    (date: Date) => () => {
+      const normalizedDate = normalizeDate(date);
+
+      controller.setFocusedDate(normalizedDate);
+      controller.setVisibleMonth(getMonthStart(normalizedDate));
+    },
+    [controller]
+  );
+
+  const handleGridKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLTableElement>) => {
+      const focusedDate = controller.state.focusedDate;
+
+      controller.setLastKeyPressed(event.key);
+
+      if (!focusedDate) {
+        return;
+      }
+
+      const resolution = resolveKeyboardNavigation(event.key, focusedDate, {
+        firstDayOfWeek,
+        shiftKey: event.shiftKey
+      });
+
+      if (resolution.action === 'noop' || !resolution.nextFocusedDate) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (resolution.shouldSelectFocusedDate) {
+        selectDate(resolution.nextFocusedDate, {
+          closeDialog,
+          disabledDates,
+          maxDate,
+          minDate,
+          onChange
+        });
+        return;
+      }
+
+      if (resolution.shouldCloseDialog) {
+        closeDialog();
+        return;
+      }
+
+      const nextFocusedDate = normalizeDate(resolution.nextFocusedDate);
+
+      controller.setFocusedDate(nextFocusedDate);
+      controller.setVisibleMonth(getMonthStart(nextFocusedDate));
+      focusDayButton(nextFocusedDate);
+    },
+    [
+      controller,
+      closeDialog,
+      disabledDates,
+      firstDayOfWeek,
+      focusDayButton,
+      maxDate,
+      minDate,
+      onChange
+    ]
+  );
 
   return {
-    lastKeyPressed: null
+    handleGridKeyDown,
+    handleDayFocus,
+    registerDayButton
   };
 }

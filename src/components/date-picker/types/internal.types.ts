@@ -46,4 +46,7 @@ export interface DatePickerStateController {
   openDialog: () => void;
   closeDialog: () => void;
   toggleDialog: () => void;
+  setFocusedDate: (date: Date | null) => void;
+  setVisibleMonth: (date: Date | null) => void;
+  setLastKeyPressed: (key: string | null) => void;
 }

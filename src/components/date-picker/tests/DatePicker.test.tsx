@@ -42,6 +42,7 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import useDatePickerState from './model/useDatePickerState';");
     expect(source).toContain("import useDatePickerInput from './model/useDatePickerInput';");
     expect(source).toContain("import useDatePickerFocus from './model/useDatePickerFocus';");
+    expect(source).toContain("import useDatePickerKeyboard from './model/useDatePickerKeyboard';");
     expect(source).toContain("import useDatePickerSelection from './model/useDatePickerSelection';");
     expect(source).toContain("import CalendarHeader from './ui/CalendarHeader';");
     expect(source).toContain("import CalendarDayCell from './ui/CalendarDayCell';");
@@ -51,7 +52,9 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import DatePickerField from './ui/DatePickerField';");
     expect(source).toContain("import DatePickerTrigger from './ui/DatePickerTrigger';");
     expect(source).toContain("import DatePickerError from './ui/DatePickerError';");
-    expect(source).toContain('const { state, closeDialog, toggleDialog } = useDatePickerState(props);');
+    expect(source).toContain('const datePickerState = useDatePickerState(props);');
+    expect(source).toContain('const { state, closeDialog, toggleDialog } = datePickerState;');
+    expect(source).toContain('const keyboardState = useDatePickerKeyboard({');
     expect(source).toContain('const { handleDaySelect } = useDatePickerSelection({');
     expect(source).toContain(
       'const displayValue = getDisplayValue('
@@ -80,10 +83,14 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('<DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>');
     expect(source).toContain('<DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>');
     expect(source).toContain('<CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />');
-    expect(source).toContain('<CalendarGrid aria-labelledby={DIALOG_TITLE_ID}>');
+    expect(source).toContain('<CalendarGrid');
+    expect(source).toContain('onKeyDown={keyboardState.handleGridKeyDown}');
     expect(source).toContain('<CalendarWeekdays weekdayLabels={weekdayLabels} />');
     expect(source).toContain('const unavailable = isDateDisabled(day, selectionOptions);');
     expect(source).toContain('onClick: () => handleDaySelect(day)');
+    expect(source).toContain('onFocus: keyboardState.handleDayFocus(day)');
+    expect(source).toContain('ref: keyboardState.registerDayButton(day)');
+    expect(source).toContain('tabIndex: focused ? 0 : -1');
     expect(source).toContain('<CalendarDayCell');
   });
 
@@ -147,6 +154,9 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('toggleDialog');
     expect(source).toContain('openDialog');
     expect(source).toContain('closeDialog');
+    expect(source).toContain('setFocusedDate');
+    expect(source).toContain('setVisibleMonth');
+    expect(source).toContain('setLastKeyPressed');
   });
 
   test('selects an available day and closes the dialog', () => {

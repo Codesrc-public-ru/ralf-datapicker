@@ -1,10 +1,17 @@
 import styles from '../DatePicker.module.css';
 
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  HTMLAttributes,
+  ReactNode,
+  Ref
+} from 'react';
 
 interface CalendarDayCellProps extends HTMLAttributes<HTMLTableCellElement> {
   children: ReactNode;
-  dayButtonProps: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>;
+  dayButtonProps: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
+    ref?: Ref<HTMLButtonElement>;
+  };
   focused?: boolean;
   outsideMonth?: boolean;
   selected?: boolean;
@@ -63,6 +70,8 @@ export default function CalendarDayCell({
         {...dayButtonProps}
         className={joinButtonClassName(dayButtonProps.className, buttonStateClassNames)}
         disabled={dayButtonProps.disabled ?? unavailable}
+        ref={dayButtonProps.ref}
+        tabIndex={dayButtonProps.tabIndex ?? (focused ? 0 : -1)}
         type={dayButtonProps.type ?? 'button'}
       >
         {children}

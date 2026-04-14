@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { getToday } from '../lib/date/getToday';
+import { isSameDay } from '../lib/date/isSameDay';
+import { isSameMonth } from '../lib/date/isSameMonth';
 import { normalizeDate } from '../lib/date/normalizeDate';
 
 import type { DatePickerInternalState, DatePickerStateController } from '../types/internal.types';
@@ -84,10 +86,50 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
     );
   }, [props.value]);
 
+  const setFocusedDate = useCallback((focusedDate: Date | null) => {
+    setState((currentState) =>
+      (currentState.focusedDate === focusedDate ||
+        (currentState.focusedDate && focusedDate && isSameDay(currentState.focusedDate, focusedDate)))
+        ? currentState
+        : {
+            ...currentState,
+            focusedDate
+          }
+    );
+  }, []);
+
+  const setVisibleMonth = useCallback((visibleMonth: Date | null) => {
+    setState((currentState) =>
+      (currentState.visibleMonth === visibleMonth ||
+        (currentState.visibleMonth &&
+          visibleMonth &&
+          isSameMonth(currentState.visibleMonth, visibleMonth)))
+        ? currentState
+        : {
+            ...currentState,
+            visibleMonth
+          }
+    );
+  }, []);
+
+  const setLastKeyPressed = useCallback((lastKeyPressed: string | null) => {
+    setState((currentState) =>
+      currentState.lastKeyPressed === lastKeyPressed
+        ? currentState
+        : {
+            ...currentState,
+            lastKeyPressed
+          }
+    );
+  }, []);
+
   return {
     state,
     openDialog,
     closeDialog,
-    toggleDialog
+    toggleDialog,
+    setFocusedDate,
+    setVisibleMonth,
+    setLastKeyPressed
   };
 }

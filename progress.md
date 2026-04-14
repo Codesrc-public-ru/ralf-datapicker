@@ -1,3 +1,11 @@
+## Progress Update for TASK-022
+
+**Status:** Done.
+
+**Completion:** Wired the keyboard engine into the calendar grid in `src/components/date-picker/DatePicker.tsx`. The grid now handles `onKeyDown`, day cells use roving `tabIndex`, and the keyboard hook keeps focus synced to the active day while `Enter`/`Space` select the date and `Escape` closes the dialog.
+
+**Validation:** `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:integration`, and `npm run test:unit` passed.
+
 ## Progress Update for TASK-041
 
 **Status:** Done.

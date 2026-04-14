@@ -15,6 +15,7 @@ import { getWeekdayNames } from './lib/i18n/getWeekdayNames';
 import { formatInputDate } from './lib/input/formatInputDate';
 import useDatePickerFocus from './model/useDatePickerFocus';
 import useDatePickerInput from './model/useDatePickerInput';
+import useDatePickerKeyboard from './model/useDatePickerKeyboard';
 import useDatePickerSelection from './model/useDatePickerSelection';
 import useDatePickerState from './model/useDatePickerState';
 import CalendarDayCell from './ui/CalendarDayCell';
@@ -43,9 +44,19 @@ const getValidationMessage = (isInvalid: boolean, message: string | null): strin
   message ?? (isInvalid ? INVALID_MESSAGE : null);
 
 export default function DatePicker(props: DatePickerProps) {
-  const { state, closeDialog, toggleDialog } = useDatePickerState(props);
+  const datePickerState = useDatePickerState(props);
+  const { state, closeDialog, toggleDialog } = datePickerState;
   const inputState = useDatePickerInput(props);
   const focusState = useDatePickerFocus(props);
+  const keyboardState = useDatePickerKeyboard({
+    closeDialog,
+    controller: datePickerState,
+    disabledDates: props.disabledDates,
+    firstDayOfWeek: getFirstDayOfWeek(props.locale),
+    maxDate: props.maxDate,
+    minDate: props.minDate,
+    onChange: props.onChange
+  });
   const { handleDaySelect } = useDatePickerSelection({
     closeDialog,
     disabledDates: props.disabledDates,
@@ -114,7 +125,10 @@ export default function DatePicker(props: DatePickerProps) {
       <DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>
       <DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>
         <CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />
-        <CalendarGrid aria-labelledby={DIALOG_TITLE_ID}>
+        <CalendarGrid
+          aria-labelledby={DIALOG_TITLE_ID}
+          onKeyDown={keyboardState.handleGridKeyDown}
+        >
           <CalendarWeekdays weekdayLabels={weekdayLabels} />
           <tbody>
             {dialogMonthMatrix.map((week, weekIndex) => (
@@ -139,7 +153,10 @@ export default function DatePicker(props: DatePickerProps) {
                           unavailable,
                           outsideMonth
                         }),
-                        onClick: () => handleDaySelect(day)
+                        onClick: () => handleDaySelect(day),
+                        onFocus: keyboardState.handleDayFocus(day),
+                        ref: keyboardState.registerDayButton(day),
+                        tabIndex: focused ? 0 : -1
                       }}
                     >
                       {day.getDate()}
