@@ -1,23 +1,58 @@
 describe('DatePicker unit scaffold', () => {
+  function loadModule(relativePath, exportNames, deps = {}) {
+    const source = ts.transpileModule(dp.read(relativePath), {
+      compilerOptions: {
+        esModuleInterop: true,
+        jsx: ts.JsxEmit.ReactJSX,
+        module: ts.ModuleKind.ESNext,
+        target: ts.ScriptTarget.ES2022
+      }
+    }).outputText;
+    const transformed = source
+      .replace(
+        /^\s*import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];\s*$/gm,
+        (_, names) => `const { ${names} } = deps;`
+      )
+      .replace(/^\s*import\s+type\s+\{[^}]+\}\s+from\s+['"][^'"]+['"];\s*$/gm, '')
+      .replace(/^\s*export\s+default\s+function\s+/gm, 'function ')
+      .replace(/^\s*export\s+default\s+/gm, '')
+      .replace(/^\s*export\s+/gm, '');
+
+    return new Function('deps', `${transformed}\nreturn { ${exportNames.join(', ')} };`)(deps);
+  }
+
   test('keeps the public component wired to the shell layers', () => {
     const source = dp.read('src/components/date-picker/DatePicker.tsx');
 
     expect(source).toContain("import type { DatePickerProps } from './types/public.types';");
     expect(source).toContain("import { getDialogAriaProps } from './lib/a11y/getDialogAriaProps';");
+    expect(source).toContain("import { getDayAriaLabel } from './lib/a11y/getDayAriaLabel';");
     expect(source).toContain("import { getInputDescribedBy } from './lib/a11y/getInputDescribedBy';");
     expect(source).toContain("import { getTriggerAriaLabel } from './lib/a11y/getTriggerAriaLabel';");
+    expect(source).toContain("import { buildMonthMatrix } from './lib/date/buildMonthMatrix';");
+    expect(source).toContain("import { getFirstDayOfWeek } from './lib/i18n/getFirstDayOfWeek';");
     expect(source).toContain("import { getMonthYearLabel } from './lib/i18n/getMonthYearLabel';");
+    expect(source).toContain("import { getWeekdayNames } from './lib/i18n/getWeekdayNames';");
     expect(source).toContain("import { getToday } from './lib/date/getToday';");
     expect(source).toContain("import { formatInputDate } from './lib/input/formatInputDate';");
+    expect(source).toContain("import { isDateDisabled } from './lib/date/isDateDisabled';");
+    expect(source).toContain("import { isSameDay } from './lib/date/isSameDay';");
+    expect(source).toContain("import { isSameMonth } from './lib/date/isSameMonth';");
+    expect(source).toContain("import { normalizeDate } from './lib/date/normalizeDate';");
     expect(source).toContain("import useDatePickerState from './model/useDatePickerState';");
     expect(source).toContain("import useDatePickerInput from './model/useDatePickerInput';");
     expect(source).toContain("import useDatePickerFocus from './model/useDatePickerFocus';");
+    expect(source).toContain("import useDatePickerSelection from './model/useDatePickerSelection';");
     expect(source).toContain("import CalendarHeader from './ui/CalendarHeader';");
+    expect(source).toContain("import CalendarDayCell from './ui/CalendarDayCell';");
+    expect(source).toContain("import CalendarGrid from './ui/CalendarGrid';");
+    expect(source).toContain("import CalendarWeekdays from './ui/CalendarWeekdays';");
     expect(source).toContain("import DatePickerDialog from './ui/DatePickerDialog';");
     expect(source).toContain("import DatePickerField from './ui/DatePickerField';");
     expect(source).toContain("import DatePickerTrigger from './ui/DatePickerTrigger';");
     expect(source).toContain("import DatePickerError from './ui/DatePickerError';");
-    expect(source).toContain('const { state, toggleDialog } = useDatePickerState(props);');
+    expect(source).toContain('const { state, closeDialog, toggleDialog } = useDatePickerState(props);');
+    expect(source).toContain('const { handleDaySelect } = useDatePickerSelection({');
     expect(source).toContain(
       'const displayValue = getDisplayValue('
     );
@@ -25,6 +60,9 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('value ? formatInputDate(value) : \'\';');
     expect(source).toContain('const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);');
     expect(source).toContain('const dialogMonth = state.visibleMonth ?? props.value ?? getToday();');
+    expect(source).toContain('const dialogMonthMatrix = buildMonthMatrix(');
+    expect(source).toContain('const weekdayLabels = getWeekdayNames(props.locale);');
+    expect(source).toContain('const selectedDate = props.value ? normalizeDate(props.value) : null;');
     expect(source).toContain(
       "const dialogAriaProps = getDialogAriaProps(state.isOpen, DIALOG_TITLE_ID);"
     );
@@ -42,7 +80,11 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('<DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>');
     expect(source).toContain('<DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>');
     expect(source).toContain('<CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />');
-    expect(source).not.toContain('CalendarGrid');
+    expect(source).toContain('<CalendarGrid aria-labelledby={DIALOG_TITLE_ID}>');
+    expect(source).toContain('<CalendarWeekdays weekdayLabels={weekdayLabels} />');
+    expect(source).toContain('const unavailable = isDateDisabled(day, selectionOptions);');
+    expect(source).toContain('onClick: () => handleDaySelect(day)');
+    expect(source).toContain('<CalendarDayCell');
   });
 
   test('re-exports the public API from the feature index', () => {
@@ -105,5 +147,38 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('toggleDialog');
     expect(source).toContain('openDialog');
     expect(source).toContain('closeDialog');
+  });
+
+  test('selects an available day and closes the dialog', () => {
+    const closeCalls = [];
+    const changeCalls = [];
+    const normalizedDate = new Date(2026, 4, 1);
+
+    const { selectDate } = loadModule(
+      'src/components/date-picker/model/useDatePickerSelection.ts',
+      ['selectDate'],
+      {
+        isDateDisabled: (date) => date.getDate() === 13,
+        normalizeDate: (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      }
+    );
+
+    const accepted = selectDate(new Date(2026, 4, 1, 18, 30), {
+      closeDialog: () => closeCalls.push('closed'),
+      disabledDates: [],
+      onChange: (value) => changeCalls.push(value)
+    });
+
+    const rejected = selectDate(new Date(2026, 4, 13, 12, 0), {
+      closeDialog: () => closeCalls.push('closed'),
+      disabledDates: [],
+      onChange: (value) => changeCalls.push(value)
+    });
+
+    expect(accepted).toBe(true);
+    expect(rejected).toBe(false);
+    expect(changeCalls).toHaveLength(1);
+    expect(changeCalls[0]).toEqual(normalizedDate);
+    expect(closeCalls).toHaveLength(1);
   });
 });

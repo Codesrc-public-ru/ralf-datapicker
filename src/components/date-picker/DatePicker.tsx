@@ -1,14 +1,26 @@
 import styles from './DatePicker.module.css';
+import { getDayAriaLabel } from './lib/a11y/getDayAriaLabel';
 import { getDialogAriaProps } from './lib/a11y/getDialogAriaProps';
 import { getInputDescribedBy } from './lib/a11y/getInputDescribedBy';
 import { getTriggerAriaLabel } from './lib/a11y/getTriggerAriaLabel';
+import { buildMonthMatrix } from './lib/date/buildMonthMatrix';
 import { getToday } from './lib/date/getToday';
+import { isDateDisabled } from './lib/date/isDateDisabled';
+import { isSameDay } from './lib/date/isSameDay';
+import { isSameMonth } from './lib/date/isSameMonth';
+import { normalizeDate } from './lib/date/normalizeDate';
+import { getFirstDayOfWeek } from './lib/i18n/getFirstDayOfWeek';
 import { getMonthYearLabel } from './lib/i18n/getMonthYearLabel';
+import { getWeekdayNames } from './lib/i18n/getWeekdayNames';
 import { formatInputDate } from './lib/input/formatInputDate';
 import useDatePickerFocus from './model/useDatePickerFocus';
 import useDatePickerInput from './model/useDatePickerInput';
+import useDatePickerSelection from './model/useDatePickerSelection';
 import useDatePickerState from './model/useDatePickerState';
+import CalendarDayCell from './ui/CalendarDayCell';
+import CalendarGrid from './ui/CalendarGrid';
 import CalendarHeader from './ui/CalendarHeader';
+import CalendarWeekdays from './ui/CalendarWeekdays';
 import DatePickerDialog from './ui/DatePickerDialog';
 import DatePickerError from './ui/DatePickerError';
 import DatePickerField from './ui/DatePickerField';
@@ -31,9 +43,16 @@ const getValidationMessage = (isInvalid: boolean, message: string | null): strin
   message ?? (isInvalid ? INVALID_MESSAGE : null);
 
 export default function DatePicker(props: DatePickerProps) {
-  const { state, toggleDialog } = useDatePickerState(props);
+  const { state, closeDialog, toggleDialog } = useDatePickerState(props);
   const inputState = useDatePickerInput(props);
   const focusState = useDatePickerFocus(props);
+  const { handleDaySelect } = useDatePickerSelection({
+    closeDialog,
+    disabledDates: props.disabledDates,
+    maxDate: props.maxDate,
+    minDate: props.minDate,
+    onChange: props.onChange
+  });
 
   const displayValue = getDisplayValue(
     props.value,
@@ -44,7 +63,19 @@ export default function DatePicker(props: DatePickerProps) {
   const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);
   const inputDescribedBy = getInputDescribedBy(errorMessage ? ERROR_ID : null);
   const dialogMonth = state.visibleMonth ?? props.value ?? getToday();
+  const dialogMonthMatrix = buildMonthMatrix(
+    dialogMonth.getFullYear(),
+    dialogMonth.getMonth(),
+    getFirstDayOfWeek(props.locale)
+  );
+  const weekdayLabels = getWeekdayNames(props.locale);
+  const selectedDate = props.value ? normalizeDate(props.value) : null;
   const dialogAriaProps = getDialogAriaProps(state.isOpen, DIALOG_TITLE_ID);
+  const selectionOptions = {
+    disabledDates: props.disabledDates,
+    maxDate: props.maxDate,
+    minDate: props.minDate
+  };
 
   return (
     <div
@@ -83,6 +114,42 @@ export default function DatePicker(props: DatePickerProps) {
       <DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>
       <DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>
         <CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />
+        <CalendarGrid aria-labelledby={DIALOG_TITLE_ID}>
+          <CalendarWeekdays weekdayLabels={weekdayLabels} />
+          <tbody>
+            {dialogMonthMatrix.map((week, weekIndex) => (
+              <tr key={`week-${weekIndex}`}>
+                {week.map((day) => {
+                  const outsideMonth = !isSameMonth(day, dialogMonth);
+                  const selected = selectedDate ? isSameDay(day, selectedDate) : false;
+                  const unavailable = isDateDisabled(day, selectionOptions);
+                  const focused = state.focusedDate ? isSameDay(day, state.focusedDate) : false;
+
+                  return (
+                    <CalendarDayCell
+                      key={`${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`}
+                      focused={focused}
+                      outsideMonth={outsideMonth}
+                      selected={selected}
+                      unavailable={unavailable}
+                      dayButtonProps={{
+                        'aria-label': getDayAriaLabel(day, {
+                          locale: props.locale,
+                          selected,
+                          unavailable,
+                          outsideMonth
+                        }),
+                        onClick: () => handleDaySelect(day)
+                      }}
+                    >
+                      {day.getDate()}
+                    </CalendarDayCell>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </CalendarGrid>
       </DatePickerDialog>
     </div>
   );

@@ -101,6 +101,11 @@ Open month choice follows selected value when present, else current month from `
 DatePicker shell now renders dialog header with month-year label and trigger aria-expanded / aria-haspopup wiring.
 Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
 
+TASK-020 done.
+DatePicker now renders the month grid in the shell and wires day click to `useDatePickerSelection`.
+Available day click calls `onChange` with normalized date and closes dialog right away.
+Validation note: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:integration`, and `npm run test:a11y` passed.
+
 TASK-018 done.
 Manual input now commits valid dates through `onChange(Date)` and full clear through `onChange(null)`.
 Draft text stays visible while editing, even when the controlled value still points to the old date.
