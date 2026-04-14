@@ -60,10 +60,25 @@ const requiredFiles = [
   'ui/DatePickerTrigger.tsx'
 ];
 
+const rootRequiredFiles = [
+  'index.html',
+  'src/App.module.css',
+  'src/App.tsx',
+  'src/main.tsx',
+  'vite.config.ts'
+];
+
 const errors = [];
 
 for (const relativePath of requiredFiles) {
   const absolutePath = path.join(featureDir, relativePath);
+  if (!fs.existsSync(absolutePath)) {
+    errors.push(`Missing file: ${path.relative(rootDir, absolutePath)}`);
+  }
+}
+
+for (const relativePath of rootRequiredFiles) {
+  const absolutePath = path.join(rootDir, relativePath);
   if (!fs.existsSync(absolutePath)) {
     errors.push(`Missing file: ${path.relative(rootDir, absolutePath)}`);
   }
@@ -76,6 +91,26 @@ if (!indexSource.includes("export { default as DatePicker } from './DatePicker';
 }
 if (!indexSource.includes("export type { DatePickerProps } from './types/public.types';")) {
   errors.push('index.ts must export public types');
+}
+
+const packageJsonPath = path.join(rootDir, 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+const requiredScripts = {
+  dev: 'vite',
+  build: 'vite build',
+  preview: 'vite preview --host 0.0.0.0'
+};
+
+for (const [scriptName, scriptCommand] of Object.entries(requiredScripts)) {
+  if (packageJson.scripts?.[scriptName] !== scriptCommand) {
+    errors.push(`package.json script ${scriptName} must be "${scriptCommand}"`);
+  }
+}
+
+const indexHtmlPath = path.join(rootDir, 'index.html');
+const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+if (!indexHtml.includes('<script type="module" src="/src/main.tsx"></script>')) {
+  errors.push('index.html must load /src/main.tsx as module entrypoint');
 }
 
 const sourceFiles = requiredFiles

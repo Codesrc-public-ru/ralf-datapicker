@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 import styles from './DatePicker.module.css';
 import { getDayAriaLabel } from './lib/a11y/getDayAriaLabel';
 import { getDialogAriaProps } from './lib/a11y/getDialogAriaProps';
@@ -46,6 +48,7 @@ const getValidationMessage = (isInvalid: boolean, message: string | null): strin
 export default function DatePicker(props: DatePickerProps) {
   const datePickerState = useDatePickerState(props);
   const { state, closeDialog, toggleDialog } = datePickerState;
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const inputState = useDatePickerInput(props);
   const focusState = useDatePickerFocus();
   const keyboardState = useDatePickerKeyboard({
@@ -88,6 +91,12 @@ export default function DatePicker(props: DatePickerProps) {
     minDate: props.minDate
   };
 
+  useEffect(() => {
+    if (!state.isOpen && state.focusTarget === 'trigger') {
+      triggerRef.current?.focus();
+    }
+  }, [state.focusTarget, state.isOpen]);
+
   return (
     <div
       className={styles.root}
@@ -117,6 +126,7 @@ export default function DatePicker(props: DatePickerProps) {
           aria-haspopup="dialog"
           aria-label={getTriggerAriaLabel(props.value, props.locale)}
           disabled={props.disabled}
+          ref={triggerRef}
           onClick={toggleDialog}
         >
           {TRIGGER_LABEL}

@@ -1,3 +1,9 @@
+TASK-044 done.
+Vite app shell now live with `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, and `src/App.module.css`.
+`package.json` now exposes `dev`, `build`, and `preview` through Vite.
+Fixed browser fallback check so focus return and selected-day aria state validate right element.
+Validation note: `npm run lint`, `npm run typecheck`, `node scripts/validate-date-picker-structure.mjs`, and `npm test` passed.
+
 TASK-026 done.
 Day cell states now have distinct visual treatment in `DatePicker.module.css` for selected, focused, unavailable, and outsideMonth.
 Added DOM coverage in `src/components/date-picker/tests/dom-stack.test.tsx` for selected, focused, unavailable, and outside-month render states.

@@ -893,6 +893,28 @@
         "TASK-042"
       ],
       "status": "pending"
+    },
+    {
+      "id": "TASK-044",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Настроить Vite app shell для DatePicker: browser entrypoint, config и scripts dev/build/preview.",
+      "acceptance_criteria": [
+        "Проект запускается через Vite в браузере и имеет явный entrypoint для монтирования DatePicker.",
+        "Скрипты `dev`, `build` и `preview` работают через Vite и собирают production bundle без ручных правок."
+      ],
+      "test_steps": [
+        "Шаг 1: добавить Vite config, browser entrypoint и HTML shell для приложения.",
+        "Шаг 2: подключить npm scripts для dev/build/preview и проверить их запуск на текущем коде.",
+        "Шаг 3: ожидаемый результат — DatePicker можно открыть в браузере, собрать и посмотреть через Vite без дополнительных ручных шагов."
+      ],
+      "dependencies": [
+        "TASK-014",
+        "TASK-040",
+        "TASK-041",
+        "TASK-042"
+      ],
+      "status": "done"
     }
   ]
 }

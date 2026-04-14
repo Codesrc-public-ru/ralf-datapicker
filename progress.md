@@ -1,3 +1,11 @@
+## Progress Update for TASK-044
+
+**Status:** Done.
+
+**Completion:** Added Vite app shell files: `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, and `src/App.module.css`. `package.json` now exposes `dev`, `build`, and `preview` through Vite, and the browser fallback check now validates the selected day and focus return on the correct element.
+
+**Validation:** `npm run lint`, `npm run typecheck`, `node scripts/validate-date-picker-structure.mjs`, and `npm test` passed.
+
 ## Progress Update for TASK-022
 
 **Status:** Done.
