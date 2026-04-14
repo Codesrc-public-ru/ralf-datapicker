@@ -7,3 +7,10 @@ TASK-003 done.
 Test scaffold is live.
 Runner covers unit, integration, and a11y source checks.
 Next step: add real React DOM test deps when project gets them.
+TASK-004 done.
+Date-only helpers now exist in lib/date.
+normalizeDate makes a local day clone.
+compareByDay gives -1/0/1 by calendar day.
+isSameDay, isSameMonth, and getToday use date-only logic.
+Next step: build month matrix and week-start helpers on top.
+Validation note: `uv`, `ruff`, and `pytest` are not installed in this workspace. Node date-picker unit harness passed instead.

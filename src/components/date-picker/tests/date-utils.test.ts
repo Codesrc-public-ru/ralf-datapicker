@@ -42,4 +42,20 @@ describe('Date utilities scaffold', () => {
       expect(source).not.toContain('jsx');
     }
   });
+
+  test('normalizes, compares, and reads today as date-only helpers', () => {
+    const normalizeDateSource = dp.read('src/components/date-picker/lib/date/normalizeDate.ts');
+    const compareDatesSource = dp.read('src/components/date-picker/lib/date/compareDates.ts');
+    const sameDaySource = dp.read('src/components/date-picker/lib/date/isSameDay.ts');
+    const sameMonthSource = dp.read('src/components/date-picker/lib/date/isSameMonth.ts');
+    const todaySource = dp.read('src/components/date-picker/lib/date/getToday.ts');
+
+    expect(normalizeDateSource).toContain('new Date(date.getFullYear(), date.getMonth(), date.getDate())');
+    expect(compareDatesSource).toContain('export const compareByDay');
+    expect(compareDatesSource).toContain('export const compareDates = compareByDay;');
+    expect(sameDaySource).toContain("import { compareByDay } from './compareDates';");
+    expect(sameMonthSource).toContain('getFullYear() === right.getFullYear()');
+    expect(todaySource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(todaySource).toContain('normalizeDate(new Date())');
+  });
 });
