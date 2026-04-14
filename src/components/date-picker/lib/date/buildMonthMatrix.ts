@@ -7,7 +7,7 @@ const WEEKS_IN_MONTH_GRID = 6;
 export const buildMonthMatrix = (
   year: number,
   month: number,
-  firstDayOfWeek = getFirstDayOfWeek(year, month)
+  firstDayOfWeek = getFirstDayOfWeek()
 ): Date[][] => {
   const firstOfMonth = new Date(year, month, 1);
   const gridStart = startOfWeek(firstOfMonth, firstDayOfWeek);

@@ -128,3 +128,79 @@ describe('Date utilities scaffold', () => {
     expect(disabledSource).toContain('disabledDates.some((disabledDate) => isSameDay(normalizedDate, disabledDate))');
   });
 });
+
+describe('I18n helpers', () => {
+  function loadModule(relativePath, exportNames, deps = {}) {
+    const source = dp.read(relativePath);
+    const transformed = source
+      .replace(/^\s*import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];\s*$/gm, (_, names) => {
+        return `const { ${names} } = deps;`;
+      })
+      .replace(/^\s*export\s+/gm, '');
+
+    return new Function(
+      'deps',
+      `${transformed}\nreturn { ${exportNames.join(', ')} };`
+    )(deps);
+  }
+
+  test('reads locale-specific first day of week from Intl', () => {
+    const { getFirstDayOfWeek } = loadModule(
+      'src/components/date-picker/lib/i18n/getFirstDayOfWeek.ts',
+      ['getFirstDayOfWeek']
+    );
+
+    expect(getFirstDayOfWeek('en-US')).toBe(0);
+    expect(getFirstDayOfWeek('de-DE')).toBe(1);
+  });
+
+  test('formats month, month-year, weekday, and full date labels for two locales', () => {
+    const { formatMonthLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/formatMonthLabel.ts',
+      ['formatMonthLabel']
+    );
+    const { getMonthYearLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/getMonthYearLabel.ts',
+      ['getMonthYearLabel'],
+      { formatMonthLabel }
+    );
+    const { formatWeekdayLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/formatWeekdayLabel.ts',
+      ['formatWeekdayLabel']
+    );
+    const { formatFullDateLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/formatFullDateLabel.ts',
+      ['formatFullDateLabel']
+    );
+
+    const date = new Date(2026, 2, 15, 22, 45);
+
+    expect(formatMonthLabel(date, 'en-US')).toBe('March');
+    expect(formatMonthLabel(date, 'de-DE')).toBe('März');
+    expect(getMonthYearLabel(date, 'en-US')).toBe('March 2026');
+    expect(getMonthYearLabel(date, 'de-DE')).toBe('März 2026');
+    expect(formatWeekdayLabel(date, 'en-US')).toBe('Sun');
+    expect(formatWeekdayLabel(date, 'de-DE')).toBe('So');
+    expect(formatFullDateLabel(date, 'en-US')).toBe('Sunday, March 15, 2026');
+    expect(formatFullDateLabel(date, 'de-DE')).toBe('Sonntag, 15. März 2026');
+  });
+
+  test('returns weekday names in locale order', () => {
+    const { formatWeekdayLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/formatWeekdayLabel.ts',
+      ['formatWeekdayLabel']
+    );
+    const { getFirstDayOfWeek } = loadModule(
+      'src/components/date-picker/lib/i18n/getFirstDayOfWeek.ts',
+      ['getFirstDayOfWeek']
+    );
+    const { getWeekdayNames } = loadModule(
+      'src/components/date-picker/lib/i18n/getWeekdayNames.ts',
+      ['getWeekdayNames'],
+      { formatWeekdayLabel, getFirstDayOfWeek }
+    );
+
+    expect(getWeekdayNames('en-US')).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+    expect(getWeekdayNames('de-DE')).toEqual(['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']);
+  });
+});

@@ -1,3 +1,10 @@
+TASK-009 done.
+i18n helpers now exist in lib/i18n.
+formatMonthLabel, getMonthYearLabel, formatWeekdayLabel, formatFullDateLabel, getWeekdayNames, and getFirstDayOfWeek use Intl and date-only normalization.
+Locale checks cover en-US and de-DE.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed.
+Validation note: `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 TASK-006 done.
 Date movement helpers are in place.
 addDays, addMonths, and addYears now clamp date-only math correctly.

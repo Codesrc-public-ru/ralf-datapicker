@@ -46,6 +46,14 @@
 
 **Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
 
+## Progress Update for TASK-009
+
+**Status:** Done.
+
+**Completion:** Implemented the i18n helper layer in `lib/i18n`. `formatMonthLabel`, `getMonthYearLabel`, `formatWeekdayLabel`, `formatFullDateLabel`, `getWeekdayNames`, and `getFirstDayOfWeek` now use `Intl` with date-only normalization and locale-aware fallback logic.
+
+**Validation:** Extended `src/components/date-picker/tests/date-utils.test.ts` with executable locale checks for `en-US` and `de-DE`. `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 ## Progress Update for TASK-008
 
 **Status:** Done.
