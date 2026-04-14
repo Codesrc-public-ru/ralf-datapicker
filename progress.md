@@ -85,3 +85,10 @@
 **Completion:** Implemented the input helper layer in `lib/input`. `sanitizeInputValue` now normalizes pasted separators without wiping invalid draft text, `parseInputDate` now separates empty, partial, valid, format, and calendar states, and `formatInputDate` now returns canonical `DD.MM.YYYY` text with zero padding.
 
 **Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .`, `uv run pytest`, and `tsc --noEmit` could not run here because those tools are not installed in this workspace.
+## Progress Update for TASK-014
+
+**Status:** Done.
+
+**Completion:** Built the public `DatePicker` shell in `src/components/date-picker/DatePicker.tsx`. The component now wires controlled `value` into `formatInputDate`, connects the shell to `useDatePickerState`, `useDatePickerInput`, and `useDatePickerFocus`, and renders the basic field, trigger, and error slot through the presentational UI layer.
+
+**Validation:** Shell wiring is covered by the updated source-level DatePicker scaffold test. Next step is open/close and calendar behavior in the following task.

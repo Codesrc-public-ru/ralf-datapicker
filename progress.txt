@@ -85,3 +85,6 @@ UI layer now has real presentational components for DatePickerField, DatePickerT
 CSS Modules now cover field, dialog, header, grid, cell, button, weekday, and state styles.
 UI layer stays dumb. No lib/model imports from ui files.
 Validation note: `node scripts/run-date-picker-tests.mjs all` and `npm run lint -- --max-warnings=0` passed.
+TASK-014 done.
+Public DatePicker shell now renders the controlled field wrapper, read-only input, trigger, and error slot. The shell pulls display text from `formatInputDate`, trigger text from `getTriggerAriaLabel`, and described-by wiring from `getInputDescribedBy`.
+Next step: wire open/close state and calendar dialog behavior in the next task chain.

@@ -8,6 +8,22 @@
   gap: 0.5rem;
 }
 
+.input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  background: canvas;
+  color: inherit;
+}
+
+.input:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .trigger {
   display: inline-flex;
   align-items: center;
