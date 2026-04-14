@@ -1,3 +1,8 @@
+TASK-035 done.
+Added real keyboard integration flow in `keyboard-navigation.test.tsx`.
+Test now proves open focus, ArrowRight, PageDown, Enter, and Escape in browser-like harness.
+Validation note: `node scripts/run-date-picker-tests.mjs all`, `npm run lint`, and `npm run typecheck` passed.
+
 TASK-030 done.
 Removed Date mutation from `parseInputDate` and raw Date identity compare from `useDatePickerState`.
 State now keeps focused day and visible month on date-only helpers only.

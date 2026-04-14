@@ -1,3 +1,13 @@
+const { default: DatePickerForKeyboard } = requireSource(
+  'src/components/date-picker/DatePicker.tsx'
+);
+const { getDayAriaLabel: getDayAriaLabelForKeyboard } = requireSource(
+  'src/components/date-picker/lib/a11y/getDayAriaLabel.ts'
+);
+const { getTriggerAriaLabel: getTriggerAriaLabelForKeyboard } = requireSource(
+  'src/components/date-picker/lib/a11y/getTriggerAriaLabel.ts'
+);
+
 describe('Keyboard integration scaffold', () => {
   function loadModule(relativePath, exportNames, deps = {}) {
     const source = ts.transpileModule(dp.read(relativePath), {
@@ -65,6 +75,83 @@ describe('Keyboard integration scaffold', () => {
     expect(source).toContain('onFocus: keyboardState.handleDayFocus(day)');
     expect(source).toContain('ref: keyboardState.registerDayButton(day)');
     expect(source).toContain('tabIndex: focused ? 0 : -1');
+  });
+
+  test('moves focus through the calendar, changes month, and selects without mouse', async () => {
+    const changeCalls = [];
+
+    async function renderControlledDatePicker() {
+      function ControlledDatePicker() {
+        const [value, setValue] = React.useState(new Date(2026, 4, 12));
+
+        return React.createElement(DatePickerForKeyboard, {
+          locale: 'en-US',
+          onChange(nextValue) {
+            changeCalls.push(nextValue);
+            setValue(nextValue);
+          },
+          value
+        });
+      }
+
+      await cleanup();
+
+      return render(React.createElement(ControlledDatePicker));
+    }
+
+    await renderControlledDatePicker();
+
+    const trigger = screen.getByRole('button', {
+      name: getTriggerAriaLabelForKeyboard(new Date(2026, 4, 12), 'en-US')
+    });
+
+    await user.click(trigger);
+
+    const may12Button = screen.getByRole('button', {
+      name: getDayAriaLabelForKeyboard(new Date(2026, 4, 12), {
+        locale: 'en-US',
+        selected: true
+      })
+    });
+
+    expect(may12Button).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+
+    const may13Button = screen.getByRole('button', {
+      name: getDayAriaLabelForKeyboard(new Date(2026, 4, 13), {
+        locale: 'en-US'
+      })
+    });
+
+    expect(may13Button).toHaveFocus();
+
+    await user.keyboard('{PageDown}');
+
+    const june13Button = screen.getByRole('button', {
+      name: getDayAriaLabelForKeyboard(new Date(2026, 5, 13), {
+        locale: 'en-US'
+      })
+    });
+
+    expect(june13Button).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    expect(changeCalls).toHaveLength(1);
+    expect(changeCalls[0].getFullYear()).toBe(2026);
+    expect(changeCalls[0].getMonth()).toBe(5);
+    expect(changeCalls[0].getDate()).toBe(13);
+    expect(screen.queryByRole('dialog')).toBe(null);
+    expect(screen.getByLabelText('Date')).toHaveValue('13.06.2026');
+
+    await user.click(screen.getByRole('button', {
+      name: getTriggerAriaLabelForKeyboard(new Date(2026, 5, 13), 'en-US')
+    }));
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).toBe(null);
   });
 
   test('maps every supported key to the expected calendar action', () => {

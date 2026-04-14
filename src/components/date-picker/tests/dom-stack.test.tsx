@@ -1,9 +1,11 @@
 const { default: DatePicker } = requireSource('src/components/date-picker/DatePicker.tsx');
-const { getDayAriaLabel } = requireSource('src/components/date-picker/lib/a11y/getDayAriaLabel.ts');
-const { getMonthYearLabel } = requireSource(
+const { getDayAriaLabel: getDayAriaLabelForDomStack } = requireSource(
+  'src/components/date-picker/lib/a11y/getDayAriaLabel.ts'
+);
+const { getMonthYearLabel: getMonthYearLabelForDomStack } = requireSource(
   'src/components/date-picker/lib/i18n/getMonthYearLabel.ts'
 );
-const { getTriggerAriaLabel } = requireSource(
+const { getTriggerAriaLabel: getTriggerAriaLabelForDomStack } = requireSource(
   'src/components/date-picker/lib/a11y/getTriggerAriaLabel.ts'
 );
 
@@ -48,7 +50,7 @@ describe('DatePicker DOM stack', () => {
     });
     const input = screen.getByLabelText('Date');
     const trigger = screen.getByRole('button', {
-      name: getTriggerAriaLabel(new Date(2026, 4, 12), 'en-US')
+      name: getTriggerAriaLabelForDomStack(new Date(2026, 4, 12), 'en-US')
     });
     const liveRegion = screen.getByRole('status');
 
@@ -60,7 +62,7 @@ describe('DatePicker DOM stack', () => {
     await user.click(trigger);
 
     const dialog = screen.getByRole('dialog');
-    const monthLabel = getMonthYearLabel(new Date(2026, 4, 1), 'en-US');
+    const monthLabel = getMonthYearLabelForDomStack(new Date(2026, 4, 1), 'en-US');
 
     expect(dialog).toBeVisible();
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
@@ -72,7 +74,7 @@ describe('DatePicker DOM stack', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: getDayAriaLabel(new Date(2026, 4, 13), {
+        name: getDayAriaLabelForDomStack(new Date(2026, 4, 13), {
           locale: 'en-US'
         })
       })
@@ -96,7 +98,7 @@ describe('DatePicker DOM stack', () => {
 
     const input = screen.getByLabelText('Date');
     const trigger = screen.getByRole('button', {
-      name: getTriggerAriaLabel(new Date(2026, 4, 12), 'en-US')
+      name: getTriggerAriaLabelForDomStack(new Date(2026, 4, 12), 'en-US')
     });
 
     expect(input).toBeInTheDocument();
@@ -113,18 +115,18 @@ describe('DatePicker DOM stack', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: getTriggerAriaLabel(new Date(2026, 4, 12), 'en-US')
+        name: getTriggerAriaLabelForDomStack(new Date(2026, 4, 12), 'en-US')
       })
     );
 
     const selectedButton = screen.getByRole('button', {
-      name: getDayAriaLabel(new Date(2026, 4, 12), {
+      name: getDayAriaLabelForDomStack(new Date(2026, 4, 12), {
         locale: 'en-US',
         selected: true
       })
     });
     const outsideMonthButton = screen.getByRole('button', {
-      name: getDayAriaLabel(new Date(2026, 3, 26), {
+      name: getDayAriaLabelForDomStack(new Date(2026, 3, 26), {
         locale: 'en-US',
         outsideMonth: true
       })
