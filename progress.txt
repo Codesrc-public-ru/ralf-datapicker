@@ -1,3 +1,9 @@
+TASK-006 done.
+Date movement helpers are in place.
+addDays, addMonths, and addYears now clamp date-only math correctly.
+Added navigation helpers for Home, End, PageUp, PageDown, and Shift+PageUp/Down.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed.
+Validation note: `uv run ruff check .` and `uv run pytest` could not run here because `uv` is not installed in this workspace.
 TASK-002 done.
 DatePicker type layer is split now.
 Public props use shared aliases.

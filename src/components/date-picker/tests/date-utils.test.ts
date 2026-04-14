@@ -4,6 +4,7 @@ describe('Date utilities scaffold', () => {
       'src/components/date-picker/lib/date/addDays.ts',
       'src/components/date-picker/lib/date/addMonths.ts',
       'src/components/date-picker/lib/date/addYears.ts',
+      'src/components/date-picker/lib/date/navigation.ts',
       'src/components/date-picker/lib/date/buildMonthMatrix.ts',
       'src/components/date-picker/lib/date/compareDates.ts',
       'src/components/date-picker/lib/date/getToday.ts',
@@ -25,6 +26,7 @@ describe('Date utilities scaffold', () => {
       'src/components/date-picker/lib/date/addDays.ts',
       'src/components/date-picker/lib/date/addMonths.ts',
       'src/components/date-picker/lib/date/addYears.ts',
+      'src/components/date-picker/lib/date/navigation.ts',
       'src/components/date-picker/lib/date/buildMonthMatrix.ts',
       'src/components/date-picker/lib/date/compareDates.ts',
       'src/components/date-picker/lib/date/getToday.ts',
@@ -45,15 +47,27 @@ describe('Date utilities scaffold', () => {
 
   test('normalizes, compares, and reads today as date-only helpers', () => {
     const normalizeDateSource = dp.read('src/components/date-picker/lib/date/normalizeDate.ts');
+    const addDaysSource = dp.read('src/components/date-picker/lib/date/addDays.ts');
+    const addMonthsSource = dp.read('src/components/date-picker/lib/date/addMonths.ts');
+    const addYearsSource = dp.read('src/components/date-picker/lib/date/addYears.ts');
     const compareDatesSource = dp.read('src/components/date-picker/lib/date/compareDates.ts');
     const sameDaySource = dp.read('src/components/date-picker/lib/date/isSameDay.ts');
     const sameMonthSource = dp.read('src/components/date-picker/lib/date/isSameMonth.ts');
     const todaySource = dp.read('src/components/date-picker/lib/date/getToday.ts');
     const startOfWeekSource = dp.read('src/components/date-picker/lib/date/startOfWeek.ts');
+    const navigationSource = dp.read('src/components/date-picker/lib/date/navigation.ts');
     const firstDayOfWeekSource = dp.read('src/components/date-picker/lib/i18n/getFirstDayOfWeek.ts');
     const monthMatrixSource = dp.read('src/components/date-picker/lib/date/buildMonthMatrix.ts');
 
     expect(normalizeDateSource).toContain('new Date(date.getFullYear(), date.getMonth(), date.getDate())');
+    expect(addDaysSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(addDaysSource).toContain('Math.trunc(amount)');
+    expect(addDaysSource).toContain('normalizedDate.getDate() + wholeDays');
+    expect(addMonthsSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(addMonthsSource).toContain('getLastDayOfMonth');
+    expect(addMonthsSource).toContain('Math.min(normalizedDate.getDate(), lastDayOfTargetMonth)');
+    expect(addYearsSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(addYearsSource).toContain('Math.min(normalizedDate.getDate(), lastDayOfTargetMonth)');
     expect(compareDatesSource).toContain('export const compareByDay');
     expect(compareDatesSource).toContain('export const compareDates = compareByDay;');
     expect(sameDaySource).toContain("import { compareByDay } from './compareDates';");
@@ -63,6 +77,17 @@ describe('Date utilities scaffold', () => {
     expect(startOfWeekSource).toContain("import { normalizeDate } from './normalizeDate';");
     expect(startOfWeekSource).toContain('normalizeFirstDayOfWeek');
     expect(startOfWeekSource).toContain('const dayOffset = (normalizedDate.getDay() - normalizedFirstDayOfWeek + 7) % 7;');
+    expect(navigationSource).toContain("import { addDays } from './addDays';");
+    expect(navigationSource).toContain("import { addMonths } from './addMonths';");
+    expect(navigationSource).toContain("import { addYears } from './addYears';");
+    expect(navigationSource).toContain("import { startOfWeek } from './startOfWeek';");
+    expect(navigationSource).toContain('export const moveDateByWeeks');
+    expect(navigationSource).toContain('export const getHomeDate');
+    expect(navigationSource).toContain('export const getEndDate');
+    expect(navigationSource).toContain('export const getPageUpDate');
+    expect(navigationSource).toContain('export const getPageDownDate');
+    expect(navigationSource).toContain('export const getShiftPageUpDate');
+    expect(navigationSource).toContain('export const getShiftPageDownDate');
     expect(firstDayOfWeekSource).toContain("new Intl.Locale(locale).weekInfo");
     expect(firstDayOfWeekSource).toContain('DEFAULT_LOCALE');
     expect(firstDayOfWeekSource).toContain('REGION_FIRST_DAY');

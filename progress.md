@@ -1,3 +1,11 @@
+## Progress Update for TASK-006
+
+**Status:** Done.
+
+**Completion:** Implemented the pure date movement layer in `lib/date`. `addDays`, `addMonths`, and `addYears` now use date-only math with month and leap-year clamping. Added a small `navigation.ts` helper module for Home, End, PageUp, PageDown, and Shift+PageUp/Down targets.
+
+**Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 ## Progress Update for TASK-002
 
 **Status:** Done.
