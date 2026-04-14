@@ -153,6 +153,12 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import { normalizeDate } from '../lib/date/normalizeDate';");
     expect(source).toContain('const getInitialFocusedDate = (value: Date | null): Date => getDateOnly(value ?? getToday());');
     expect(source).toContain('const getInitialVisibleMonth = (value: Date | null): Date =>');
+    expect(source).toContain('const shouldKeepFocusedDate =');
+    expect(source).toContain('const shouldKeepVisibleMonth =');
+    expect(source).toContain('isSameDay(currentDate, nextDate)');
+    expect(source).toContain('isSameMonth(currentMonth, nextMonth)');
+    expect(source).toContain('shouldKeepFocusedDate(currentState.focusedDate, focusedDate)');
+    expect(source).toContain('shouldKeepVisibleMonth(currentState.visibleMonth, visibleMonth)');
     expect(source).toContain('new Date(date.getFullYear(), date.getMonth(), 1)');
     expect(source).toContain('isOpen: true');
     expect(source).toContain('visibleMonth: getInitialVisibleMonth(value)');

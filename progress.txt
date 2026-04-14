@@ -1,3 +1,9 @@
+TASK-030 done.
+Removed Date mutation from `parseInputDate` and raw Date identity compare from `useDatePickerState`.
+State now keeps focused day and visible month on date-only helpers only.
+Validation note: `npm test -- --runInBand`, `npm run lint`, and `npm run typecheck` passed.
+Next step: TASK-029 if security hardening is next.
+
 TASK-044 done.
 Vite app shell now live with `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, and `src/App.module.css`.
 `package.json` now exposes `dev`, `build`, and `preview` through Vite.

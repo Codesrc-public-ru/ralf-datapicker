@@ -36,6 +36,14 @@ const getInitialFocusedDate = (value: Date | null): Date => getDateOnly(value ??
 const getInitialVisibleMonth = (value: Date | null): Date =>
   getMonthStart(getInitialFocusedDate(value));
 
+const shouldKeepFocusedDate = (currentDate: Date | null, nextDate: Date | null): boolean =>
+  !currentDate && !nextDate ? true : !!(currentDate && nextDate && isSameDay(currentDate, nextDate));
+
+const shouldKeepVisibleMonth = (currentMonth: Date | null, nextMonth: Date | null): boolean =>
+  !currentMonth && !nextMonth
+    ? true
+    : !!(currentMonth && nextMonth && isSameMonth(currentMonth, nextMonth));
+
 const getOpenState = (
   currentState: DatePickerInternalState,
   value: Date | null
@@ -88,8 +96,7 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
 
   const setFocusedDate = useCallback((focusedDate: Date | null) => {
     setState((currentState) =>
-      (currentState.focusedDate === focusedDate ||
-        (currentState.focusedDate && focusedDate && isSameDay(currentState.focusedDate, focusedDate)))
+      shouldKeepFocusedDate(currentState.focusedDate, focusedDate)
         ? currentState
         : {
             ...currentState,
@@ -100,10 +107,7 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
 
   const setVisibleMonth = useCallback((visibleMonth: Date | null) => {
     setState((currentState) =>
-      (currentState.visibleMonth === visibleMonth ||
-        (currentState.visibleMonth &&
-          visibleMonth &&
-          isSameMonth(currentState.visibleMonth, visibleMonth)))
+      shouldKeepVisibleMonth(currentState.visibleMonth, visibleMonth)
         ? currentState
         : {
             ...currentState,

@@ -17,12 +17,8 @@ const FULL_INPUT_PATTERN = /^\d{2}\.\d{2}\.\d{4}$/;
 const PARTIAL_INPUT_PATTERN = /^\d{0,2}(?:\.\d{0,2})?(?:\.\d{0,4})?$/;
 const DATE_PART_SEPARATOR = '.';
 
-const createLocalDate = (year: number, monthIndex: number, day: number): Date => {
-  const date = new Date(0);
-  date.setFullYear(year, monthIndex, day);
-  date.setHours(0, 0, 0, 0);
-  return date;
-};
+const createLocalDate = (year: number, monthIndex: number, day: number): Date =>
+  new Date(year, monthIndex, day);
 
 const isValidCalendarDate = (year: number, month: number, day: number): boolean => {
   const candidateDate = createLocalDate(year, month - 1, day);

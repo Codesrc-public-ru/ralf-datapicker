@@ -29,7 +29,10 @@ describe('Input helper layer', () => {
     expect(source).toContain("status: 'valid'");
     expect(source).toContain("status: 'format'");
     expect(source).toContain("status: 'calendar'");
-    expect(source).toContain('setFullYear(year, monthIndex, day)');
+    expect(source).toContain(
+      'const createLocalDate = (year: number, monthIndex: number, day: number): Date =>'
+    );
+    expect(source).toContain('new Date(year, monthIndex, day)');
     expect(source).toContain('candidateDate.getFullYear() === year');
     expect(source).toContain("errorType: 'format'");
     expect(source).toContain("errorType: 'calendar'");
