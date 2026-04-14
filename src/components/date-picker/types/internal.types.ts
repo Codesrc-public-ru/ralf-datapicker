@@ -40,3 +40,10 @@ export interface DatePickerInternalState
     DatePickerLiveRegionState {
   validation: DatePickerValidationState;
 }
+
+export interface DatePickerStateController {
+  state: DatePickerInternalState;
+  openDialog: () => void;
+  closeDialog: () => void;
+  toggleDialog: () => void;
+}

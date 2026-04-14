@@ -88,3 +88,10 @@ Validation note: `node scripts/run-date-picker-tests.mjs all` and `npm run lint 
 TASK-014 done.
 Public DatePicker shell now renders the controlled field wrapper, read-only input, trigger, and error slot. The shell pulls display text from `formatInputDate`, trigger text from `getTriggerAriaLabel`, and described-by wiring from `getInputDescribedBy`.
 Next step: wire open/close state and calendar dialog behavior in the next task chain.
+
+TASK-016 done.
+DatePicker now toggles calendar dialog from trigger click.
+`useDatePickerState` now keeps open/close actions, `visibleMonth`, and focused day state.
+Open month choice follows selected value when present, else current month from `getToday`.
+DatePicker shell now renders dialog header with month-year label and trigger aria-expanded / aria-haspopup wiring.
+Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.

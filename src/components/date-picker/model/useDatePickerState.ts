@@ -1,4 +1,9 @@
-import type { DatePickerInternalState } from '../types/internal.types';
+import { useCallback, useState } from 'react';
+
+import { getToday } from '../lib/date/getToday';
+import { normalizeDate } from '../lib/date/normalizeDate';
+
+import type { DatePickerInternalState, DatePickerStateController } from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
 
 const createInitialState = (): DatePickerInternalState => ({
@@ -20,6 +25,69 @@ const createInitialState = (): DatePickerInternalState => ({
   }
 });
 
-export default function useDatePickerState(_props: DatePickerProps): DatePickerInternalState {
-  return createInitialState();
+const getDateOnly = (date: Date): Date => normalizeDate(date);
+
+const getMonthStart = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), 1);
+
+const getInitialFocusedDate = (value: Date | null): Date => getDateOnly(value ?? getToday());
+
+const getInitialVisibleMonth = (value: Date | null): Date =>
+  getMonthStart(getInitialFocusedDate(value));
+
+const getOpenState = (
+  currentState: DatePickerInternalState,
+  value: Date | null
+): DatePickerInternalState => ({
+  ...currentState,
+  isOpen: true,
+  visibleMonth: getInitialVisibleMonth(value),
+  focusedDate: getInitialFocusedDate(value),
+  focusTarget: 'grid',
+  isFocusInsideDialog: true
+});
+
+const getClosedState = (currentState: DatePickerInternalState): DatePickerInternalState => ({
+  ...currentState,
+  isOpen: false,
+  visibleMonth: null,
+  focusedDate: null,
+  focusTarget: 'trigger',
+  isFocusInsideDialog: false
+});
+
+export default function useDatePickerState(props: DatePickerProps): DatePickerStateController {
+  const [state, setState] = useState(createInitialState);
+
+  const openDialog = useCallback(() => {
+    setState((currentState) => {
+      if (currentState.isOpen) {
+        return currentState;
+      }
+
+      return getOpenState(currentState, props.value);
+    });
+  }, [props.value]);
+
+  const closeDialog = useCallback(() => {
+    setState((currentState) => {
+      if (!currentState.isOpen) {
+        return currentState;
+      }
+
+      return getClosedState(currentState);
+    });
+  }, []);
+
+  const toggleDialog = useCallback(() => {
+    setState((currentState) =>
+      currentState.isOpen ? getClosedState(currentState) : getOpenState(currentState, props.value)
+    );
+  }, [props.value]);
+
+  return {
+    state,
+    openDialog,
+    closeDialog,
+    toggleDialog
+  };
 }
