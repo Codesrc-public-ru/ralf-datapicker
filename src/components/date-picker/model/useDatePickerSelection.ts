@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 
+import { getLiveRegionMessage } from '../lib/a11y/getLiveRegionMessage';
 import { isDateDisabled } from '../lib/date/isDateDisabled';
 import { normalizeDate } from '../lib/date/normalizeDate';
+import { formatFullDateLabel } from '../lib/i18n/formatFullDateLabel';
 
 import type { DatePickerProps } from '../types/public.types';
 
@@ -10,7 +12,9 @@ interface DateSelectionOptions {
   disabledDates?: DatePickerProps['disabledDates'];
   maxDate?: DatePickerProps['maxDate'];
   minDate?: DatePickerProps['minDate'];
+  locale?: DatePickerProps['locale'];
   onChange: DatePickerProps['onChange'];
+  setLiveRegionMessage: (message: string) => void;
 }
 
 export const selectDate = (date: Date, options: DateSelectionOptions): boolean => {
@@ -18,8 +22,13 @@ export const selectDate = (date: Date, options: DateSelectionOptions): boolean =
     return false;
   }
 
-  options.onChange(normalizeDate(date));
+  const normalizedDate = normalizeDate(date);
+
+  options.onChange(normalizedDate);
   options.closeDialog();
+  options.setLiveRegionMessage(
+    getLiveRegionMessage(formatFullDateLabel(normalizedDate, options.locale), 'selected')
+  );
 
   return true;
 };
@@ -27,17 +36,20 @@ export const selectDate = (date: Date, options: DateSelectionOptions): boolean =
 export default function useDatePickerSelection(options: DateSelectionOptions): {
   handleDaySelect: (date: Date) => boolean;
 } {
-  const { closeDialog, disabledDates, maxDate, minDate, onChange } = options;
+  const { closeDialog, disabledDates, locale, maxDate, minDate, onChange, setLiveRegionMessage } =
+    options;
   const handleDaySelect = useCallback(
     (date: Date) =>
       selectDate(date, {
         closeDialog,
         disabledDates,
+        locale,
         maxDate,
         minDate,
-        onChange
+        onChange,
+        setLiveRegionMessage
       }),
-    [closeDialog, disabledDates, maxDate, minDate, onChange]
+    [closeDialog, disabledDates, locale, maxDate, minDate, onChange, setLiveRegionMessage]
   );
 
   return {

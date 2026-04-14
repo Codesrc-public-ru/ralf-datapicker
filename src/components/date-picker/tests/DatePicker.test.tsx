@@ -25,6 +25,7 @@ describe('DatePicker unit scaffold', () => {
     const source = dp.read('src/components/date-picker/DatePicker.tsx');
 
     expect(source).toContain("import type { DatePickerProps } from './types/public.types';");
+    expect(source).toContain("import { ACCESSIBILITY_CONSTANTS } from './constants/accessibility';");
     expect(source).toContain("import { getDialogAriaProps } from './lib/a11y/getDialogAriaProps';");
     expect(source).toContain("import { getDayAriaLabel } from './lib/a11y/getDayAriaLabel';");
     expect(source).toContain("import { getInputDescribedBy } from './lib/a11y/getInputDescribedBy';");
@@ -53,9 +54,12 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import DatePickerTrigger from './ui/DatePickerTrigger';");
     expect(source).toContain("import DatePickerError from './ui/DatePickerError';");
     expect(source).toContain('const datePickerState = useDatePickerState(props);');
-    expect(source).toContain('const { state, closeDialog, toggleDialog } = datePickerState;');
+    expect(source).toContain(
+      'const { state, closeDialog, toggleDialog, setLiveRegionMessage } = datePickerState;'
+    );
     expect(source).toContain('const keyboardState = useDatePickerKeyboard({');
     expect(source).toContain('const { handleDaySelect } = useDatePickerSelection({');
+    expect(source).toContain('setLiveRegionMessage: datePickerState.setLiveRegionMessage');
     expect(source).toContain(
       'const displayValue = getDisplayValue('
     );
@@ -81,6 +85,10 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('onChange={(event) => inputState.handleInputChange(event.currentTarget.value)}');
     expect(source).toContain('onFocus={inputState.handleInputFocus}');
     expect(source).toContain('<DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>');
+    expect(source).toContain('role="status"');
+    expect(source).toContain('aria-live="polite"');
+    expect(source).toContain('id={ACCESSIBILITY_CONSTANTS.LIVE_REGION_ID}');
+    expect(source).toContain('{state.liveRegionMessage}');
     expect(source).toContain('onKeyDown={focusState.handleDialogKeyDown}');
     expect(source).toContain('<DatePickerDialog');
     expect(source).toContain('<CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />');
@@ -163,12 +171,23 @@ describe('DatePicker unit scaffold', () => {
   test('selects an available day and closes the dialog', () => {
     const closeCalls = [];
     const changeCalls = [];
+    const liveCalls = [];
     const normalizedDate = new Date(2026, 4, 1);
+    const { formatFullDateLabel } = loadModule(
+      'src/components/date-picker/lib/i18n/formatFullDateLabel.ts',
+      ['formatFullDateLabel']
+    );
+    const { getLiveRegionMessage } = loadModule(
+      'src/components/date-picker/lib/a11y/getLiveRegionMessage.ts',
+      ['getLiveRegionMessage']
+    );
 
     const { selectDate } = loadModule(
       'src/components/date-picker/model/useDatePickerSelection.ts',
       ['selectDate'],
       {
+        formatFullDateLabel,
+        getLiveRegionMessage,
         isDateDisabled: (date) => date.getDate() === 13,
         normalizeDate: (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
       }
@@ -177,19 +196,27 @@ describe('DatePicker unit scaffold', () => {
     const accepted = selectDate(new Date(2026, 4, 1, 18, 30), {
       closeDialog: () => closeCalls.push('closed'),
       disabledDates: [],
-      onChange: (value) => changeCalls.push(value)
+      locale: 'en-US',
+      onChange: (value) => changeCalls.push(value),
+      setLiveRegionMessage: (value) => liveCalls.push(value)
     });
 
     const rejected = selectDate(new Date(2026, 4, 13, 12, 0), {
       closeDialog: () => closeCalls.push('closed'),
       disabledDates: [],
-      onChange: (value) => changeCalls.push(value)
+      locale: 'en-US',
+      onChange: (value) => changeCalls.push(value),
+      setLiveRegionMessage: (value) => liveCalls.push(value)
     });
 
     expect(accepted).toBe(true);
     expect(rejected).toBe(false);
     expect(changeCalls).toHaveLength(1);
     expect(changeCalls[0]).toEqual(normalizedDate);
+    expect(liveCalls).toHaveLength(1);
+    expect(liveCalls[0]).toBe(
+      getLiveRegionMessage(formatFullDateLabel(normalizedDate, 'en-US'), 'selected')
+    );
     expect(closeCalls).toHaveLength(1);
   });
 });

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 
+import { ACCESSIBILITY_CONSTANTS } from './constants/accessibility';
 import styles from './DatePicker.module.css';
 import { getDayAriaLabel } from './lib/a11y/getDayAriaLabel';
 import { getDialogAriaProps } from './lib/a11y/getDialogAriaProps';
 import { getInputDescribedBy } from './lib/a11y/getInputDescribedBy';
+import { getLiveRegionMessage } from './lib/a11y/getLiveRegionMessage';
 import { getTriggerAriaLabel } from './lib/a11y/getTriggerAriaLabel';
 import { buildMonthMatrix } from './lib/date/buildMonthMatrix';
 import { getToday } from './lib/date/getToday';
@@ -11,6 +13,7 @@ import { isDateDisabled } from './lib/date/isDateDisabled';
 import { isSameDay } from './lib/date/isSameDay';
 import { isSameMonth } from './lib/date/isSameMonth';
 import { normalizeDate } from './lib/date/normalizeDate';
+import { formatFullDateLabel } from './lib/i18n/formatFullDateLabel';
 import { getFirstDayOfWeek } from './lib/i18n/getFirstDayOfWeek';
 import { getMonthYearLabel } from './lib/i18n/getMonthYearLabel';
 import { getWeekdayNames } from './lib/i18n/getWeekdayNames';
@@ -47,8 +50,9 @@ const getValidationMessage = (isInvalid: boolean, message: string | null): strin
 
 export default function DatePicker(props: DatePickerProps) {
   const datePickerState = useDatePickerState(props);
-  const { state, closeDialog, toggleDialog } = datePickerState;
+  const { state, closeDialog, toggleDialog, setLiveRegionMessage } = datePickerState;
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const previousSelectedValueRef = useRef<Date | null>(props.value ? normalizeDate(props.value) : null);
   const inputState = useDatePickerInput(props);
   const focusState = useDatePickerFocus();
   const keyboardState = useDatePickerKeyboard({
@@ -56,16 +60,20 @@ export default function DatePicker(props: DatePickerProps) {
     controller: datePickerState,
     disabledDates: props.disabledDates,
     firstDayOfWeek: getFirstDayOfWeek(props.locale),
+    locale: props.locale,
     maxDate: props.maxDate,
     minDate: props.minDate,
-    onChange: props.onChange
+    onChange: props.onChange,
+    setLiveRegionMessage: datePickerState.setLiveRegionMessage
   });
   const { handleDaySelect } = useDatePickerSelection({
     closeDialog,
     disabledDates: props.disabledDates,
+    locale: props.locale,
     maxDate: props.maxDate,
     minDate: props.minDate,
-    onChange: props.onChange
+    onChange: props.onChange,
+    setLiveRegionMessage: datePickerState.setLiveRegionMessage
   });
 
   const displayValue = getDisplayValue(
@@ -96,6 +104,20 @@ export default function DatePicker(props: DatePickerProps) {
       triggerRef.current?.focus();
     }
   }, [state.focusTarget, state.isOpen]);
+
+  useEffect(() => {
+    const normalizedValue = props.value ? normalizeDate(props.value) : null;
+
+    if (
+      normalizedValue &&
+      (!previousSelectedValueRef.current ||
+        !isSameDay(previousSelectedValueRef.current, normalizedValue))
+    ) {
+      setLiveRegionMessage(getLiveRegionMessage(formatFullDateLabel(normalizedValue, props.locale), 'selected'));
+    }
+
+    previousSelectedValueRef.current = normalizedValue;
+  }, [props.locale, props.value, setLiveRegionMessage]);
 
   return (
     <div
@@ -133,6 +155,15 @@ export default function DatePicker(props: DatePickerProps) {
         </DatePickerTrigger>
       </DatePickerField>
       <DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>
+      <div
+        aria-atomic="true"
+        aria-live="polite"
+        className={styles.liveRegion}
+        id={ACCESSIBILITY_CONSTANTS.LIVE_REGION_ID}
+        role="status"
+      >
+        {state.liveRegionMessage}
+      </div>
       <DatePickerDialog
         {...dialogAriaProps}
         id={DIALOG_ID}

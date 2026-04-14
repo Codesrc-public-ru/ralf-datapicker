@@ -1,5 +1,8 @@
 const { default: DatePicker } = requireSource('src/components/date-picker/DatePicker.tsx');
 const { getDayAriaLabel } = requireSource('src/components/date-picker/lib/a11y/getDayAriaLabel.ts');
+const { getMonthYearLabel } = requireSource(
+  'src/components/date-picker/lib/i18n/getMonthYearLabel.ts'
+);
 const { getTriggerAriaLabel } = requireSource(
   'src/components/date-picker/lib/a11y/getTriggerAriaLabel.ts'
 );
@@ -39,31 +42,47 @@ describe('DatePicker DOM stack', () => {
   }
 
   test('renders user-event friendly flow with controlled sync and focus trap', async () => {
-    await renderControlledDatePicker();
+    await renderControlledDatePicker({
+      initialValue: new Date(2026, 4, 12),
+      locale: 'en-US'
+    });
     const input = screen.getByLabelText('Date');
     const trigger = screen.getByRole('button', {
-      name: getTriggerAriaLabel(null, 'en-US')
+      name: getTriggerAriaLabel(new Date(2026, 4, 12), 'en-US')
     });
-
-    expect(input).toHaveValue('');
-    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
-    await user.type(input, '12.05.2026');
+    const liveRegion = screen.getByRole('status');
 
     expect(input).toHaveValue('12.05.2026');
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(liveRegion).toHaveTextContent('');
 
     await user.click(trigger);
 
     const dialog = screen.getByRole('dialog');
+    const monthLabel = getMonthYearLabel(new Date(2026, 4, 1), 'en-US');
 
     expect(dialog).toBeVisible();
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(liveRegion).toHaveTextContent(monthLabel);
 
     await user.tab();
 
     expect(dialog.contains(document.activeElement)).toBe(true);
 
+    await user.click(
+      screen.getByRole('button', {
+        name: getDayAriaLabel(new Date(2026, 4, 13), {
+          locale: 'en-US'
+        })
+      })
+    );
+
+    expect(screen.queryByRole('dialog')).toBe(null);
+    expect(input).toHaveValue('13.05.2026');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(trigger);
     await user.keyboard('{Escape}');
 
     expect(screen.queryByRole('dialog')).toBe(null);

@@ -49,4 +49,5 @@ export interface DatePickerStateController {
   setFocusedDate: (date: Date | null) => void;
   setVisibleMonth: (date: Date | null) => void;
   setLastKeyPressed: (key: string | null) => void;
+  setLiveRegionMessage: (message: string) => void;
 }

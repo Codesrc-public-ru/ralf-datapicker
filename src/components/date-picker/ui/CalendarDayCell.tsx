@@ -36,6 +36,7 @@ export default function CalendarDayCell({
 }: CalendarDayCellProps) {
   const cellStateClassNames = [];
   const buttonStateClassNames = [];
+  const ariaDisabled = dayButtonProps['aria-disabled'] ?? (unavailable || undefined);
 
   if (focused) {
     buttonStateClassNames.push(styles.focused);
@@ -68,6 +69,7 @@ export default function CalendarDayCell({
     >
       <button
         {...dayButtonProps}
+        aria-disabled={ariaDisabled}
         className={joinButtonClassName(dayButtonProps.className, buttonStateClassNames)}
         disabled={dayButtonProps.disabled ?? unavailable}
         ref={dayButtonProps.ref}

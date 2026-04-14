@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { selectDate } from './useDatePickerSelection';
 import { KEYBOARD_KEYS } from '../constants/keyboard';
+import { getLiveRegionMessage } from '../lib/a11y/getLiveRegionMessage';
 import { isDateDisabled } from '../lib/date/isDateDisabled';
 import {
   getEndDate,
@@ -14,6 +15,7 @@ import {
   moveDateByWeeks
 } from '../lib/date/navigation';
 import { normalizeDate } from '../lib/date/normalizeDate';
+import { getMonthYearLabel } from '../lib/i18n/getMonthYearLabel';
 
 import type { DatePickerStateController } from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
@@ -46,9 +48,11 @@ interface DatePickerKeyboardOptions {
   closeDialog: () => void;
   disabledDates?: DatePickerProps['disabledDates'];
   firstDayOfWeek?: number;
+  locale?: DatePickerProps['locale'];
   maxDate?: DatePickerProps['maxDate'];
   minDate?: DatePickerProps['minDate'];
   onChange: DatePickerProps['onChange'];
+  setLiveRegionMessage: (message: string) => void;
 }
 
 const createNeutralResolution = (): KeyboardNavigationResolution => ({
@@ -134,9 +138,11 @@ export default function useDatePickerKeyboard({
   closeDialog,
   disabledDates,
   firstDayOfWeek = 0,
+  locale,
   maxDate,
   minDate,
-  onChange
+  onChange,
+  setLiveRegionMessage
 }: DatePickerKeyboardOptions): DatePickerKeyboardController {
   const dayButtonRefs = useRef(new Map<string, HTMLButtonElement>());
 
@@ -161,6 +167,16 @@ export default function useDatePickerKeyboard({
 
     focusDayButton(controller.state.focusedDate);
   }, [controller.state.focusedDate, controller.state.isOpen, focusDayButton]);
+
+  useEffect(() => {
+    if (!controller.state.isOpen || !controller.state.visibleMonth) {
+      return;
+    }
+
+    setLiveRegionMessage(
+      getLiveRegionMessage(getMonthYearLabel(controller.state.visibleMonth, locale))
+    );
+  }, [controller.state.isOpen, controller.state.visibleMonth, locale, setLiveRegionMessage]);
 
   const registerDayButton = useCallback(
     (date: Date) => (element: HTMLButtonElement | null) => {
@@ -215,9 +231,11 @@ export default function useDatePickerKeyboard({
         selectDate(resolution.nextFocusedDate, {
           closeDialog,
           disabledDates,
+          locale,
           maxDate,
           minDate,
-          onChange
+          onChange,
+          setLiveRegionMessage
         });
         return;
       }
@@ -239,9 +257,11 @@ export default function useDatePickerKeyboard({
       disabledDates,
       firstDayOfWeek,
       focusDayButton,
+      locale,
       maxDate,
       minDate,
-      onChange
+      onChange,
+      setLiveRegionMessage
     ]
   );
 

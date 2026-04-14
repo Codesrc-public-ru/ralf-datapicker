@@ -161,3 +161,9 @@ Added real DOM test harness in `scripts/date-picker-test-harness.mjs`.
 Runner now transpiles TS/TSX/CSS source through require hooks, installs mini DOM/window globals, and exposes `render`, `screen`, `user`, and jest-dom style matchers to VM tests.
 Added `src/components/date-picker/tests/dom-stack.test.tsx` to prove render, query, click, tab, visibility, focus, and attribute assertions in integration mode.
 Validation note: `npm test`, `npm run lint`, and `npm run typecheck` all pass.
+
+TASK-031 done.
+Added live region support to DatePicker with `role="status"` and `aria-live="polite"`, plus controlled a11y state wiring for dialog, grid, and day cells.
+Selection and open flows now keep centralized a11y helpers in use, and DOM coverage checks the live region on open.
+Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
+Next step: TASK-028 if responsive/mobile accessibility is next.

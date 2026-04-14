@@ -123,6 +123,17 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
     );
   }, []);
 
+  const setLiveRegionMessage = useCallback((liveRegionMessage: string) => {
+    setState((currentState) =>
+      currentState.liveRegionMessage === liveRegionMessage
+        ? currentState
+        : {
+            ...currentState,
+            liveRegionMessage
+          }
+    );
+  }, []);
+
   return {
     state,
     openDialog,
@@ -130,6 +141,7 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
     toggleDialog,
     setFocusedDate,
     setVisibleMonth,
-    setLastKeyPressed
+    setLastKeyPressed,
+    setLiveRegionMessage
   };
 }
