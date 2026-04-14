@@ -1,7 +1,7 @@
-## Progress Update for TASK-001
+## Progress Update for TASK-002
 
 **Status:** Done.
 
-**Completion:** DatePicker scaffold in place. `types`, `model`, `lib`, `ui`, `constants`, `tests`, `index.ts`, and `DatePicker.module.css` are present per PRD.
+**Completion:** Public and internal DatePicker types are split by responsibility. `DatePickerProps` now uses reusable aliases, and internal state has explicit input, calendar, keyboard, focus, live region, and validation models.
 
-**Validation:** `npm run lint` and `npm test` both pass. `index.ts` exports `DatePicker` and `DatePickerProps`, and scaffold imports stay cycle-free.
+**Validation:** Type stubs in `DatePicker.tsx` and the model hooks import the shared types directly. Task status updated after the type-layer work.

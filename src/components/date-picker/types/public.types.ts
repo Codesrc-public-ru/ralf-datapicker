@@ -1,9 +1,15 @@
+export type DatePickerValue = Date | null;
+
+export type DatePickerDisabledDatePredicate = (date: Date) => boolean;
+
+export type DatePickerDisabledDates = Date[] | DatePickerDisabledDatePredicate;
+
 export interface DatePickerProps {
-  value: Date | null;
-  onChange: (value: Date | null) => void;
+  value: DatePickerValue;
+  onChange: (value: DatePickerValue) => void;
   minDate?: Date;
   maxDate?: Date;
-  disabledDates?: Date[] | ((date: Date) => boolean);
+  disabledDates?: DatePickerDisabledDates;
   locale?: string;
   disabled?: boolean;
   required?: boolean;

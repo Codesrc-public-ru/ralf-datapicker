@@ -1,11 +1,41 @@
 export type ValidationErrorType = 'format' | 'range' | 'external' | 'required' | null;
 
-export interface DatePickerInternalState {
+export interface DatePickerValidationState {
+  errorType: ValidationErrorType;
+  errorMessage: string | null;
+  isVisible: boolean;
+}
+
+export interface DatePickerInputState {
+  rawInputValue: string;
+  isInputFocused: boolean;
+  isInputDirty: boolean;
+}
+
+export interface DatePickerCalendarState {
   isOpen: boolean;
   visibleMonth: Date | null;
   focusedDate: Date | null;
-  rawInputValue: string;
-  isInputFocused: boolean;
+}
+
+export interface DatePickerKeyboardState {
+  lastKeyPressed: string | null;
+}
+
+export interface DatePickerFocusState {
+  focusTarget: 'input' | 'trigger' | 'grid' | null;
+  isFocusInsideDialog: boolean;
+}
+
+export interface DatePickerLiveRegionState {
   liveRegionMessage: string;
-  validationErrorType: ValidationErrorType;
+}
+
+export interface DatePickerInternalState
+  extends DatePickerInputState,
+    DatePickerCalendarState,
+    DatePickerKeyboardState,
+    DatePickerFocusState,
+    DatePickerLiveRegionState {
+  validation: DatePickerValidationState;
 }
