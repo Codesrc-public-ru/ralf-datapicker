@@ -45,3 +45,11 @@
 **Completion:** Implemented the range and disabled helpers in `lib/date`. `isDateInRange` now normalizes date-only values, checks inclusive min/max bounds, and rejects reversed boundaries. `isDateDisabled` now reuses the range helper, then checks `disabledDates` by normalized day for both arrays and predicates.
 
 **Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
+## Progress Update for TASK-008
+
+**Status:** Done.
+
+**Completion:** Implemented the input helper layer in `lib/input`. `sanitizeInputValue` now normalizes pasted separators without wiping invalid draft text, `parseInputDate` now separates empty, partial, valid, format, and calendar states, and `formatInputDate` now returns canonical `DD.MM.YYYY` text with zero padding.
+
+**Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .`, `uv run pytest`, and `tsc --noEmit` could not run here because those tools are not installed in this workspace.

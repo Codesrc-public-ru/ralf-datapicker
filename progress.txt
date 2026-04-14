@@ -30,3 +30,9 @@ Range and disabled helpers now work in lib/date.
 isDateInRange now compares date-only values and treats reversed bounds as invalid.
 isDateDisabled now checks min/max first, then disabledDates arrays and predicates with normalized days.
 Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run here because `uv` is not installed.
+TASK-008 done.
+Input helpers now live in lib/input.
+sanitizeInputValue normalizes pasted separators and keeps invalid draft text visible.
+parseInputDate now splits empty, partial, valid, format, and calendar states.
+formatInputDate now returns canonical DD.MM.YYYY text with zero padding.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .`, `uv run pytest`, and `tsc --noEmit` could not run here because those tools are not installed in this workspace.
