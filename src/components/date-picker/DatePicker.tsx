@@ -47,7 +47,7 @@ export default function DatePicker(props: DatePickerProps) {
   const datePickerState = useDatePickerState(props);
   const { state, closeDialog, toggleDialog } = datePickerState;
   const inputState = useDatePickerInput(props);
-  const focusState = useDatePickerFocus(props);
+  const focusState = useDatePickerFocus();
   const keyboardState = useDatePickerKeyboard({
     closeDialog,
     controller: datePickerState,
@@ -123,7 +123,12 @@ export default function DatePicker(props: DatePickerProps) {
         </DatePickerTrigger>
       </DatePickerField>
       <DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>
-      <DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>
+      <DatePickerDialog
+        {...dialogAriaProps}
+        id={DIALOG_ID}
+        onKeyDown={focusState.handleDialogKeyDown}
+        open={state.isOpen}
+      >
         <CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />
         <CalendarGrid
           aria-labelledby={DIALOG_TITLE_ID}

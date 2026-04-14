@@ -1,3 +1,8 @@
+TASK-023 done.
+Added dialog focus trap in `useDatePickerFocus` with Tab and Shift+Tab cycling through enabled day buttons.
+DatePicker now wires dialog `onKeyDown` to the focus hook, while initial open focus still lands on the selected day or today through the keyboard focus sync.
+Validation note: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run test:integration` passed.
+
 TASK-022 done.
 Keyboard engine now wired to calendar grid.
 Grid gets `onKeyDown`.
