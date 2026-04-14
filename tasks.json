@@ -813,6 +813,86 @@
         "TASK-038"
       ],
       "status": "pending"
+    },
+    {
+      "id": "TASK-040",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Настроить ESLint как обязательный quality gate для TypeScript/React-кода и тестов компонента.",
+      "acceptance_criteria": [
+        "В проекте есть ESLint-конфиг для src и tests с правилами для TypeScript, React, hooks и import ordering.",
+        "Скрипт lint запускается отдельно и ловит базовые ошибки до запуска тестов."
+      ],
+      "test_steps": [
+        "Шаг 1: добавить конфигурацию ESLint и нужные npm scripts для lint.",
+        "Шаг 2: проверить, что ESLint покрывает source и test-файлы без ложных пропусков для текущей структуры.",
+        "Шаг 3: ожидаемый результат — lint становится обязательной частью качества кода."
+      ],
+      "dependencies": [
+        "TASK-001"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-041",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Добавить статический typecheck через TypeScript как отдельный quality gate и связать его с проектными скриптами.",
+      "acceptance_criteria": [
+        "Есть отдельная команда typecheck, которая запускает tsc без emit.",
+        "Typecheck используется отдельно от тестов и не смешивается с runtime-проверками."
+      ],
+      "test_steps": [
+        "Шаг 1: добавить TypeScript-конфигурацию для строгой проверки проекта.",
+        "Шаг 2: подключить script typecheck и проверить его запуск на текущем коде.",
+        "Шаг 3: ожидаемый результат — статическая типизация проверяется как самостоятельный этап."
+      ],
+      "dependencies": [
+        "TASK-001",
+        "TASK-040"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-042",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Настроить unit/integration test stack для DatePicker: runner, DOM окружение, user-event и jest-dom-style assertions.",
+      "acceptance_criteria": [
+        "В проекте есть рабочий unit/integration runner для React-компонентов и pure helpers.",
+        "Тестовый стек поддерживает DOM-рендеринг, interaction helpers и удобные assertions для поведения компонента."
+      ],
+      "test_steps": [
+        "Шаг 1: добавить test runner и DOM окружение для component tests.",
+        "Шаг 2: подключить helpers для user interactions и DOM assertions.",
+        "Шаг 3: ожидаемый результат — unit/integration тесты можно запускать отдельной командой."
+      ],
+      "dependencies": [
+        "TASK-001",
+        "TASK-040",
+        "TASK-041"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TASK-043",
+      "category": "infrastructure",
+      "priority": "high",
+      "description": "Добавить accessibility и browser-level test tooling для keyboard, focus и aria-regressions.",
+      "acceptance_criteria": [
+        "Есть автоматическая a11y-проверка через axe-core или эквивалентный инструмент.",
+        "Доступен browser-level контур для проверок keyboard and focus flow в интерактивных сценариях."
+      ],
+      "test_steps": [
+        "Шаг 1: подключить a11y tooling и скрипт для автоматической проверки ключевых состояний.",
+        "Шаг 2: добавить браузерный контур для keyboard/focus регрессий.",
+        "Шаг 3: ожидаемый результат — accessibility и interactive flow проверяются отдельным слоем."
+      ],
+      "dependencies": [
+        "TASK-041",
+        "TASK-042"
+      ],
+      "status": "pending"
     }
   ]
 }

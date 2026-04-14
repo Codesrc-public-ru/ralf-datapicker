@@ -620,6 +620,35 @@ Bad:
 works correctly
 datepicker test
 should handle input
+
+Tooling Requirements
+
+The project quality gate must include more than the structure validator script.
+
+Required tools and checks:
+
+- `eslint` for all TypeScript, TSX, and test files.
+- `tsc --noEmit` as a separate static type gate.
+- A real unit/integration test runner for component and helper coverage.
+- DOM interaction helpers for user-event style behavior tests.
+- Accessibility checks with `axe-core` or an equivalent a11y assertion layer.
+- Browser-level keyboard and focus regression checks for interactive flows.
+
+Required scripts:
+
+- `lint`
+- `typecheck`
+- `test:unit`
+- `test:integration`
+- `test:a11y`
+
+Rules:
+
+- ESLint must cover React, hooks, TypeScript, import ordering, and accessibility-sensitive patterns where relevant.
+- Structure validation is only a supplementary guard. It does not replace lint or tests.
+- New quality tooling must be added through a task before implementation starts.
+- Interactive changes must be protected by keyboard, focus, and accessibility tests, not only unit tests.
+
 Review Checklist
 
 Before finishing implementation, verify:

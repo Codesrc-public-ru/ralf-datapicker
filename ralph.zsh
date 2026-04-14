@@ -1,70 +1,15 @@
 #!/usr/bin/env zsh
 set -euo pipefail
-setopt aliases pipefail no_nomatch
-
-ZSHRC_PATH="${ZDOTDIR:-$HOME}/.zshrc"
-[[ -f "$ZSHRC_PATH" ]] && source "$ZSHRC_PATH" >/dev/null 2>&1 || true
+setopt pipefail no_nomatch
 
 TASKS_FILE="${TASKS_FILE:-tasks.json}"
 PROGRESS_FILE="${PROGRESS_FILE:-progress.md}"
 MAX_AGENT_ATTEMPTS="${MAX_AGENT_ATTEMPTS:-4}"
 MAX_ITERATIONS="${MAX_ITERATIONS:-200}"
+AGENT_CMD="${AGENT_CMD:-codex}"
 
 : "${lint_cmd:?Переменная lint_cmd не задана}"
 : "${test_cmd:?Переменная test_cmd не задана}"
-
-typeset -ga AGENT_WORDS
-
-resolve_agent_words() {
-    local raw="${AGENT_CMD:-}"
-    local alias_line=""
-    local alias_value=""
-    local first=""
-    local i=0
-    local -a words
-    local -a expanded
-    local -a rest
-
-    if [[ -z "$raw" ]]; then
-        if alias codexLoc >/dev/null 2>&1; then
-            raw="codexLoc"
-        elif command -v codexLoc >/dev/null 2>&1; then
-            raw="codexLoc"
-        else
-            raw="codex --profile lmstudio"
-        fi
-    fi
-
-    words=("${(z)raw}")
-    first="${words[1]}"
-
-    if [[ -n "$first" ]] && alias "$first" >/dev/null 2>&1; then
-        alias_line="$(alias "$first")"
-        alias_value="${alias_line#*=}"
-        alias_value="${alias_value#\'}"
-        alias_value="${alias_value%\'}"
-        expanded=("${(z)alias_value}")
-
-        rest=()
-        for (( i = 2; i <= ${#words[@]}; i++ )); do
-            rest+=("${words[i]}")
-        done
-
-        AGENT_WORDS=("${expanded[@]}" "${rest[@]}")
-    else
-        AGENT_WORDS=("${words[@]}")
-    fi
-
-    if (( ${#AGENT_WORDS[@]} == 0 )); then
-        echo "Не удалось определить команду агента" >&2
-        exit 1
-    fi
-
-    if ! command -v "${AGENT_WORDS[1]}" >/dev/null 2>&1; then
-        echo "Команда агента не найдена: ${AGENT_WORDS[1]}" >&2
-        exit 1
-    fi
-}
 
 validate_tasks_json() {
     python3 - "$TASKS_FILE" <<'PY'
@@ -309,7 +254,7 @@ for task in tasks:
         blocked.append((task.get("id"), unmet))
 
 if not blocked:
-    print("Нет ready pending-задач и нет явных blocked-задач.")
+    print("Нет ready pending-задач и нет blocked-задач.")
 else:
     for task_id, unmet in blocked:
         print(f"{task_id}: ждёт {', '.join(unmet)}")
@@ -394,29 +339,23 @@ run_agent() {
     local prompt_file=""
     local wrapper_file=""
     local rc=0
-    local arg=""
 
     prompt_file="$(mktemp)"
     wrapper_file="$(mktemp)"
 
     print -r -- "$prompt" > "$prompt_file"
 
-    {
-        print '#!/usr/bin/env zsh'
-        print 'set -euo pipefail'
-        printf 'PROMPT_FILE=%q\n' "$prompt_file"
-        printf 'exec'
-        for arg in "${AGENT_WORDS[@]}"; do
-            printf ' %q' "$arg"
-        done
-        printf ' "$(cat "$PROMPT_FILE")"\n'
-    } > "$wrapper_file"
+    cat > "$wrapper_file" <<EOF
+#!/usr/bin/env zsh
+set -euo pipefail
+exec ${AGENT_CMD} "\$(cat "$prompt_file")"
+EOF
 
     chmod +x "$wrapper_file"
 
     set +e
     {
-        echo ">>> AGENT: ${AGENT_WORDS[*]}"
+        echo ">>> AGENT: ${AGENT_CMD}"
         script -qefc "$wrapper_file" /dev/null
     } 2>&1 | tee "$log_file"
     rc=$?
@@ -461,31 +400,27 @@ build_agent_prompt() {
     cat <<EOF
 Ты работаешь в уже подготовленной среде внутри текущего git-репозитория.
 
-Среда уже подготовлена оболочкой перед твоим запуском.
 Используй текущий shell и текущий PATH.
-Не пытайся объяснять проблему с отсутствием окружения, а работай в уже активированном окружении.
+Не объясняй проблемы окружения.
+Работай в уже активированной среде.
 
-Твоя задача на ЭТУ сессию: выполнить РОВНО ОДНУ задачу:
+Твоя задача на эту сессию: выполнить ровно одну задачу:
 $task_id
 
 Данные задачи:
 $task_payload
 
-Общие правила:
-1. Найди фичу с наивысшим приоритетом и работай ТОЛЬКО над ней.
-   Эта фича уже выбрана за тебя: $task_id
-2. Проверь, что линтер проходит через '$lint_cmd', а тесты через '$test_cmd'.
-3. Обнови TASK с информацией о выполненной работе.
-4. Добавь свой прогресс в файл $PROGRESS_FILE.
-   Используй это, чтобы оставить заметку для следующей итерации работы над кодом.
-5. Сделай git commit для этой фичи.
-6. Если команда падает, исправь причину и повтори попытку в этой же итерации, а не просто опиши проблему.
-7. РАБОТАЙ ТОЛЬКО НАД ОДНОЙ ФИЧЕЙ.
-8. Прочитай tasks.json и git log --oneline -20 перед началом.
-9. Не трогай код, не связанный с текущей задачей.
-10. Меняй status на done только после успешного прохождения всех test_steps.
-11. Не удаляй и не переписывай другие задачи.
-12. Финальный коммит делай только после зелёных lint/tests.
+Правила:
+1. Работай только над этой задачей: $task_id
+2. Перед началом прочитай tasks.json и git log --oneline -20
+3. Проверь зависимости задачи
+4. После изменений прогони '$lint_cmd'
+5. После изменений прогони '$test_cmd'
+6. Обнови статус задачи только если test_steps реально пройдены
+7. Добавь заметку в $PROGRESS_FILE
+8. Сделай git commit только по этой задаче
+9. Не трогай несвязанный код
+10. Если команда падает, исправь причину и повтори в этой же попытке
 
 Если задача полностью выполнена:
 - выставь status=done
@@ -497,8 +432,6 @@ $extra_feedback
 EOF
 }
 
-resolve_agent_words
-
 [[ -f "$TASKS_FILE" ]] || {
     echo "Файл не найден: $TASKS_FILE" >&2
     exit 1
@@ -506,8 +439,13 @@ resolve_agent_words
 
 [[ -f "$PROGRESS_FILE" ]] || : > "$PROGRESS_FILE"
 
+if ! command -v "$AGENT_CMD" >/dev/null 2>&1; then
+    echo "Команда агента не найдена: $AGENT_CMD" >&2
+    exit 1
+fi
+
 if ! command -v script >/dev/null 2>&1; then
-    echo "Команда 'script' не найдена. Нужен пакет util-linux." >&2
+    echo "Команда 'script' не найдена. Установи util-linux." >&2
     exit 1
 fi
 
@@ -591,7 +529,7 @@ while true; do
 
         if (( agent_rc != 0 )); then
             set_task_status "$task_id" "pending" || true
-            feedback=$'Предыдущий запуск агента завершился с ошибкой.\nИсправь причину и продолжай ТОЛЬКО эту задачу.\n'
+            feedback=$'Предыдущий запуск агента завершился с ошибкой.\nИсправь причину и продолжай только эту задачу.\n'
             feedback+=$'\nПоследний вывод:\n'
             feedback+="$(tail_log "$agent_log")"
             (( attempt += 1 ))
@@ -616,7 +554,7 @@ while true; do
 
         if [[ "$task_status" != "done" && "$promise_seen" != "1" ]]; then
             set_task_status "$task_id" "pending" || true
-            feedback=$'Задача всё ещё не завершена: status != done и COMPLETE не выведен.\nПродолжай ТОЛЬКО эту задачу.\n'
+            feedback=$'Задача ещё не завершена: status != done и COMPLETE не выведен.\nПродолжай только эту задачу.\n'
             (( attempt += 1 ))
             rm -f "$agent_log" "$tasks_backup" "$progress_backup"
             continue
@@ -628,7 +566,7 @@ while true; do
 
         if (( lint_rc != 0 )); then
             set_task_status "$task_id" "pending" || true
-            feedback=$'После твоих изменений lint не проходит.\nИсправь причину и снова заверши ТОЛЬКО текущую задачу.\n'
+            feedback=$'После изменений lint не проходит.\nИсправь причину и снова заверши только текущую задачу.\n'
             feedback+=$'\nЛоги lint:\n'
             feedback+="$(tail_log "$lint_log")"
             (( attempt += 1 ))
@@ -642,7 +580,7 @@ while true; do
 
         if (( test_rc != 0 )); then
             set_task_status "$task_id" "pending" || true
-            feedback=$'После твоих изменений тесты не проходят.\nИсправь причину и снова заверши ТОЛЬКО текущую задачу.\n'
+            feedback=$'После изменений тесты не проходят.\nИсправь причину и снова заверши только текущую задачу.\n'
             feedback+=$'\nЛоги тестов:\n'
             feedback+="$(tail_log "$test_log")"
             (( attempt += 1 ))
