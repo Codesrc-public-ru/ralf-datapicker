@@ -1,5 +1,5 @@
-import { getFirstDayOfWeek } from '../i18n/getFirstDayOfWeek';
 import { startOfWeek } from './startOfWeek';
+import { getFirstDayOfWeek } from '../i18n/getFirstDayOfWeek';
 
 const DAYS_IN_WEEK = 7;
 const WEEKS_IN_MONTH_GRID = 6;

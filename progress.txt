@@ -67,3 +67,9 @@ getInputDescribedBy composes and dedupes ids.
 getLiveRegionMessage joins announcement parts cleanly.
 getDialogAriaProps returns dialog role, aria-modal, title id, and hidden state for closed dialog.
 Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` both fail because `uv` is not installed in this workspace.
+
+TASK-015 done.
+UI layer now has real presentational components for DatePickerField, DatePickerTrigger, DatePickerError, DatePickerDialog, CalendarHeader, CalendarWeekdays, CalendarGrid, and CalendarDayCell.
+CSS Modules now cover field, dialog, header, grid, cell, button, weekday, and state styles.
+UI layer stays dumb. No lib/model imports from ui files.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `npm run lint -- --max-warnings=0` passed.

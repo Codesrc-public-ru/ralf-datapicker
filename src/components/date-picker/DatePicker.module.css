@@ -4,31 +4,88 @@
 
 .field {
   display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
 }
 
 .trigger {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.5rem;
+  min-inline-size: 2.5rem;
 }
 
 .dialog {
   position: relative;
+  padding: 1rem;
+  border: 1px solid currentColor;
+  border-radius: 0.75rem;
+  background: canvas;
 }
 
 .header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block-end: 0.75rem;
+}
+
+.headerLabel {
+  font-weight: 700;
+}
+
+.headerActions {
+  display: inline-flex;
+  gap: 0.5rem;
 }
 
 .grid {
-  display: grid;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gridCaption {
+  margin-block-end: 0.5rem;
+  text-align: start;
+  font-weight: 700;
+}
+
+.weekdays {
+  border-block-end: 1px solid currentColor;
+}
+
+.weekday {
+  padding-block: 0.5rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 .cell {
   min-inline-size: 2.5rem;
   min-block-size: 2.5rem;
+  padding: 0.125rem;
+  text-align: center;
+}
+
+.dayButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
 }
 
 .selected {
   font-weight: 700;
+  background: currentColor;
+  color: canvas;
 }
 
 .focused {
@@ -50,4 +107,6 @@
 
 .error {
   display: block;
+  margin-block-start: 0.5rem;
+  color: currentColor;
 }

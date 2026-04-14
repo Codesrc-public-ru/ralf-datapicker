@@ -1,8 +1,8 @@
-import type { DatePickerDisabledDates } from '../../types/public.types';
-
 import { isDateInRange } from './isDateInRange';
 import { isSameDay } from './isSameDay';
 import { normalizeDate } from './normalizeDate';
+
+import type { DatePickerDisabledDates } from '../../types/public.types';
 
 interface DateDisabledOptions {
   minDate?: Date | null;

@@ -8,7 +8,8 @@ describe('Input helper layer', () => {
   test('sanitizes pasted separators but keeps invalid draft text visible', () => {
     const source = dp.read('src/components/date-picker/lib/input/sanitizeInputValue.ts');
 
-    expect(source).toContain("replace(SEPARATOR_PATTERN, '.')");
+    expect(source).toContain("char === '/' || char === '\\\\' || char === '-'");
+    expect(source).toContain('charCodeAt(0)');
     expect(source).toContain("replace(SPACING_AROUND_DOTS_PATTERN, '.')");
     expect(source).toContain("replace(MULTIPLE_DOTS_PATTERN, '.')");
     expect(source).toContain('trim()');

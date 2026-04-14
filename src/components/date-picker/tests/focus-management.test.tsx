@@ -10,7 +10,9 @@ describe('Focus integration scaffold', () => {
   test('keeps dialog state separate from the UI layer', () => {
     const source = dp.read('src/components/date-picker/ui/DatePickerDialog.tsx');
 
-    expect(source).toContain('// Placeholder for dialog');
+    expect(source).toContain('role="dialog"');
+    expect(source).toContain('aria-modal="true"');
+    expect(source).toContain('hidden={!open}');
     expect(source).not.toContain('useDatePickerFocus');
     expect(source).not.toContain('useDatePickerKeyboard');
   });

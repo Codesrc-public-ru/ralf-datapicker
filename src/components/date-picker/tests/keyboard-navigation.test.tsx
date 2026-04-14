@@ -66,35 +66,35 @@ describe('Keyboard integration scaffold', () => {
 
     const deps = {
       KEYBOARD_KEYS,
-      moveDateByDays: (date, amount) => {
+      moveDateByDays: (_date, amount) => {
         calls.push(['days', amount]);
-        return makeDate(date.getDate() + amount);
+        return makeDate(15 + amount);
       },
-      moveDateByWeeks: (date, amount) => {
+      moveDateByWeeks: (_date, amount) => {
         calls.push(['weeks', amount]);
-        return makeDate(date.getDate() + amount * 7);
+        return makeDate(15 + amount * 7);
       },
-      getHomeDate: (date, firstDayOfWeek) => {
+      getHomeDate: (_date, firstDayOfWeek) => {
         calls.push(['home', firstDayOfWeek]);
         return makeDate(firstDayOfWeek + 1);
       },
-      getEndDate: (date, firstDayOfWeek) => {
+      getEndDate: (_date, firstDayOfWeek) => {
         calls.push(['end', firstDayOfWeek]);
         return makeDate(firstDayOfWeek + 7);
       },
-      getPageUpDate: (date) => {
+      getPageUpDate: (_date) => {
         calls.push(['month', -1]);
         return makeDate(5);
       },
-      getPageDownDate: (date) => {
+      getPageDownDate: (_date) => {
         calls.push(['month', 1]);
         return makeDate(25);
       },
-      getShiftPageUpDate: (date) => {
+      getShiftPageUpDate: (_date) => {
         calls.push(['year', -1]);
         return makeDate(9);
       },
-      getShiftPageDownDate: (date) => {
+      getShiftPageDownDate: (_date) => {
         calls.push(['year', 1]);
         return makeDate(21);
       }
