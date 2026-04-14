@@ -6,7 +6,11 @@ import { isSameMonth } from '../lib/date/isSameMonth';
 import { normalizeDate } from '../lib/date/normalizeDate';
 import { startOfMonth } from '../lib/date/startOfMonth';
 
-import type { DatePickerInternalState, DatePickerStateController } from '../types/internal.types';
+import type {
+  DatePickerInternalState,
+  DatePickerStateController,
+  DatePickerValidationState
+} from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
 
 const createInitialState = (): DatePickerInternalState => ({
@@ -42,6 +46,15 @@ const shouldKeepVisibleMonth = (currentMonth: Date | null, nextMonth: Date | nul
   !currentMonth && !nextMonth
     ? true
     : !!(currentMonth && nextMonth && isSameMonth(currentMonth, nextMonth));
+
+const shouldKeepValidationState = (
+  currentValidation: DatePickerValidationState,
+  nextValidation: DatePickerValidationState
+): boolean =>
+  currentValidation.errorType === nextValidation.errorType &&
+  currentValidation.errorMessage === nextValidation.errorMessage &&
+  currentValidation.isVisible === nextValidation.isVisible &&
+  currentValidation.isInvalid === nextValidation.isInvalid;
 
 const getOpenState = (
   currentState: DatePickerInternalState,
@@ -137,6 +150,17 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
     );
   }, []);
 
+  const setValidation = useCallback((validation: DatePickerValidationState) => {
+    setState((currentState) =>
+      shouldKeepValidationState(currentState.validation, validation)
+        ? currentState
+        : {
+            ...currentState,
+            validation
+          }
+    );
+  }, []);
+
   return {
     state,
     openDialog,
@@ -145,6 +169,7 @@ export default function useDatePickerState(props: DatePickerProps): DatePickerSt
     setFocusedDate,
     setVisibleMonth,
     setLastKeyPressed,
-    setLiveRegionMessage
+    setLiveRegionMessage,
+    setValidation
   };
 }

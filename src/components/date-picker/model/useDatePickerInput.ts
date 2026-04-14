@@ -17,6 +17,7 @@ export default function useDatePickerInput(props: DatePickerProps): DatePickerIn
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isInputDirty, setIsInputDirty] = useState(false);
   const previousControlledInputValue = useRef(controlledInputValue);
+  const pendingControlledInputValue = useRef<string | null>(null);
 
   useEffect(() => {
     const nextControlledInputValue = getControlledInputValue(props.value);
@@ -29,9 +30,11 @@ export default function useDatePickerInput(props: DatePickerProps): DatePickerIn
     previousControlledInputValue.current = nextControlledInputValue;
 
     if (isInputFocused && isInputDirty) {
+      pendingControlledInputValue.current = nextControlledInputValue;
       return;
     }
 
+    pendingControlledInputValue.current = null;
     setRawInputValue(sanitizeInputValue(nextControlledInputValue));
     setIsInputDirty(false);
   }, [isInputDirty, isInputFocused, props.value]);
@@ -60,6 +63,14 @@ export default function useDatePickerInput(props: DatePickerProps): DatePickerIn
 
   const handleInputBlur = useCallback(() => {
     setIsInputFocused(false);
+
+    if (pendingControlledInputValue.current === null) {
+      return;
+    }
+
+    setRawInputValue(sanitizeInputValue(pendingControlledInputValue.current));
+    setIsInputDirty(false);
+    pendingControlledInputValue.current = null;
   }, []);
 
   return {

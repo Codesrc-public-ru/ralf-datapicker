@@ -1,3 +1,9 @@
+TASK-034 done.
+Added controlled-sync integration tests for draft, blur, and null-clear paths.
+DatePicker now keeps draft text, shows blur validation, and syncs controlled null state clean.
+Test harness got clear/backspace helpers for user-like input cleanup.
+Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
 TASK-002 done.
 Shared internal type layer now lives in `src/components/date-picker/types/internal.types.ts`.
 Moved hook and UI prop types out of component files, and `validation.ts` now reuses the shared input model.

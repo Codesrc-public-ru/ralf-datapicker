@@ -111,6 +111,7 @@ export interface DatePickerStateController {
   setVisibleMonth: (date: Date | null) => void;
   setLastKeyPressed: (key: string | null) => void;
   setLiveRegionMessage: (message: string) => void;
+  setValidation: (validation: DatePickerValidationState) => void;
 }
 
 export interface DateSelectionOptions {

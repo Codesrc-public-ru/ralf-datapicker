@@ -452,6 +452,18 @@ function createUser(document) {
           dispatchKeyboardSequence(element, char);
         });
       }
+    },
+    async clear(element) {
+      await runAct(() => {
+        if (isFocusable(element)) {
+          element.focus();
+        }
+
+        if ('value' in element) {
+          setNativeValue(element, '');
+          dispatchInputEvent(element, '', '');
+        }
+      });
     }
   };
 }
@@ -489,6 +501,16 @@ function parseKeyboardInput(value) {
 
 function dispatchKeyboardSequence(target, token) {
   switch (token) {
+    case 'Backspace':
+      if ('value' in target) {
+        const nextValue = String(target.value ?? '').slice(0, -1);
+        setNativeValue(target, nextValue);
+        dispatchInputEvent(target, '', nextValue);
+        return;
+      }
+
+      dispatchKeyboardEvent(target, token, {});
+      return;
     case 'Escape':
     case 'Enter':
     case 'Tab':

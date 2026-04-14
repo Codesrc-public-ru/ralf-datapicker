@@ -18,11 +18,13 @@ import { getFirstDayOfWeek } from './lib/i18n/getFirstDayOfWeek';
 import { getMonthYearLabel } from './lib/i18n/getMonthYearLabel';
 import { getWeekdayNames } from './lib/i18n/getWeekdayNames';
 import { formatInputDate } from './lib/input/formatInputDate';
+import { parseInputDate } from './lib/input/parseInputDate';
 import useDatePickerFocus from './model/useDatePickerFocus';
 import useDatePickerInput from './model/useDatePickerInput';
 import useDatePickerKeyboard from './model/useDatePickerKeyboard';
 import useDatePickerSelection from './model/useDatePickerSelection';
 import useDatePickerState from './model/useDatePickerState';
+import { getDatePickerValidationState } from './model/validation';
 import CalendarDayCell from './ui/CalendarDayCell';
 import CalendarGrid from './ui/CalendarGrid';
 import CalendarHeader from './ui/CalendarHeader';
@@ -40,17 +42,13 @@ const DIALOG_ID = 'date-picker-dialog';
 const DIALOG_TITLE_ID = 'date-picker-dialog-title';
 const FIELD_LABEL = 'Date';
 const TRIGGER_LABEL = 'Open date picker';
-const INVALID_MESSAGE = 'Invalid date';
 
 const getDisplayValue = (value: Date | null, draftValue: string, isDraftVisible: boolean): string =>
   isDraftVisible ? draftValue : value ? formatInputDate(value) : '';
 
-const getValidationMessage = (isInvalid: boolean, message: string | null): string | null =>
-  message ?? (isInvalid ? INVALID_MESSAGE : null);
-
 export default function DatePicker(props: DatePickerProps) {
   const datePickerState = useDatePickerState(props);
-  const { state, closeDialog, toggleDialog, setLiveRegionMessage } = datePickerState;
+  const { state, closeDialog, toggleDialog, setLiveRegionMessage, setValidation } = datePickerState;
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const previousSelectedValueRef = useRef<Date | null>(props.value ? normalizeDate(props.value) : null);
   const inputState = useDatePickerInput(props);
@@ -81,8 +79,19 @@ export default function DatePicker(props: DatePickerProps) {
     inputState.rawInputValue,
     inputState.isInputFocused || inputState.isInputDirty
   );
-  const isInvalid = props.invalid || state.validation.isInvalid;
-  const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);
+  const parsedInput = parseInputDate(inputState.rawInputValue);
+  const validationState = getDatePickerValidationState({
+    parsedInput,
+    candidateDate: parsedInput.status === 'valid' ? parsedInput.date : props.value ? normalizeDate(props.value) : null,
+    minDate: props.minDate,
+    maxDate: props.maxDate,
+    externalInvalid: props.invalid,
+    externalErrorMessage: null,
+    required: props.required,
+    isVisible: props.invalid || (!inputState.isInputFocused && inputState.isInputDirty)
+  });
+  const isInvalid = props.invalid || (state.validation.isVisible && state.validation.isInvalid);
+  const errorMessage = state.validation.isVisible ? state.validation.errorMessage : null;
   const inputDescribedBy = getInputDescribedBy(errorMessage ? ERROR_ID : null);
   const dialogMonth = state.visibleMonth ?? props.value ?? getToday();
   const dialogMonthMatrix = buildMonthMatrix(
@@ -98,6 +107,10 @@ export default function DatePicker(props: DatePickerProps) {
     maxDate: props.maxDate,
     minDate: props.minDate
   };
+
+  useEffect(() => {
+    setValidation(validationState);
+  }, [setValidation, validationState]);
 
   useEffect(() => {
     if (!state.isOpen && state.focusTarget === 'trigger') {

@@ -41,6 +41,7 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import { isSameMonth } from './lib/date/isSameMonth';");
     expect(source).toContain("import { normalizeDate } from './lib/date/normalizeDate';");
     expect(source).toContain("import useDatePickerState from './model/useDatePickerState';");
+    expect(source).toContain("import { getDatePickerValidationState } from './model/validation';");
     expect(source).toContain("import useDatePickerInput from './model/useDatePickerInput';");
     expect(source).toContain("import useDatePickerFocus from './model/useDatePickerFocus';");
     expect(source).toContain("import useDatePickerKeyboard from './model/useDatePickerKeyboard';");
@@ -55,7 +56,7 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import DatePickerError from './ui/DatePickerError';");
     expect(source).toContain('const datePickerState = useDatePickerState(props);');
     expect(source).toContain(
-      'const { state, closeDialog, toggleDialog, setLiveRegionMessage } = datePickerState;'
+      'const { state, closeDialog, toggleDialog, setLiveRegionMessage, setValidation } = datePickerState;'
     );
     expect(source).toContain('const keyboardState = useDatePickerKeyboard({');
     expect(source).toContain('const { handleDaySelect } = useDatePickerSelection({');
@@ -65,7 +66,14 @@ describe('DatePicker unit scaffold', () => {
     );
     expect(source).toContain('inputState.isInputFocused || inputState.isInputDirty');
     expect(source).toContain('value ? formatInputDate(value) : \'\';');
-    expect(source).toContain('const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);');
+    expect(source).toContain("import { parseInputDate } from './lib/input/parseInputDate';");
+    expect(source).toContain('const validationState = getDatePickerValidationState({');
+    expect(source).toContain('candidateDate: parsedInput.status === \'valid\' ? parsedInput.date : props.value ? normalizeDate(props.value) : null,');
+    expect(source).toContain('isVisible: props.invalid || (!inputState.isInputFocused && inputState.isInputDirty)');
+    expect(source).toContain('const isInvalid = props.invalid || (state.validation.isVisible && state.validation.isInvalid);');
+    expect(source).toContain('const errorMessage = state.validation.isVisible ? state.validation.errorMessage : null;');
+    expect(source).toContain('useEffect(() => {');
+    expect(source).toContain('setValidation(validationState);');
     expect(source).toContain('const dialogMonth = state.visibleMonth ?? props.value ?? getToday();');
     expect(source).toContain('const dialogMonthMatrix = buildMonthMatrix(');
     expect(source).toContain('const weekdayLabels = getWeekdayNames(props.locale);');
@@ -173,6 +181,7 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('setFocusedDate');
     expect(source).toContain('setVisibleMonth');
     expect(source).toContain('setLastKeyPressed');
+    expect(source).toContain('setValidation');
   });
 
   test('selects an available day and closes the dialog', () => {

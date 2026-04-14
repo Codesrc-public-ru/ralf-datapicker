@@ -14,6 +14,7 @@ const testFilesByMode = {
   all: [
     'src/components/date-picker/tests/DatePicker.test.tsx',
     'src/components/date-picker/tests/dom-stack.test.tsx',
+    'src/components/date-picker/tests/controlled-sync.test.tsx',
     'src/components/date-picker/tests/helper-units.test.ts',
     'src/components/date-picker/tests/date-utils.test.ts',
     'src/components/date-picker/tests/input-validation.test.tsx',
@@ -29,6 +30,7 @@ const testFilesByMode = {
   ],
   integration: [
     'src/components/date-picker/tests/dom-stack.test.tsx',
+    'src/components/date-picker/tests/controlled-sync.test.tsx',
     'src/components/date-picker/tests/keyboard-navigation.test.tsx',
     'src/components/date-picker/tests/focus-management.test.tsx'
   ],
