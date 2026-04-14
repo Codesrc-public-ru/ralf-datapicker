@@ -1,3 +1,8 @@
+TASK-041 sync done.
+Typecheck gate already exists in `package.json` and `tsconfig.json`.
+Verified with `npm run typecheck`; pass.
+Updated TASK-041 status in `tasks.json`.
+
 TASK-041 done.
 Typecheck gate already existed in `package.json` and `tsconfig.json`.
 Ran `npm run typecheck` and it passed.
