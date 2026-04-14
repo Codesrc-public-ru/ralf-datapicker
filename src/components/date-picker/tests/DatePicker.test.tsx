@@ -159,7 +159,8 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('isSameMonth(currentMonth, nextMonth)');
     expect(source).toContain('shouldKeepFocusedDate(currentState.focusedDate, focusedDate)');
     expect(source).toContain('shouldKeepVisibleMonth(currentState.visibleMonth, visibleMonth)');
-    expect(source).toContain('new Date(date.getFullYear(), date.getMonth(), 1)');
+    expect(source).toContain("import { startOfMonth } from '../lib/date/startOfMonth';");
+    expect(source).toContain('startOfMonth(getInitialFocusedDate(value))');
     expect(source).toContain('isOpen: true');
     expect(source).toContain('visibleMonth: getInitialVisibleMonth(value)');
     expect(source).toContain('focusedDate: getInitialFocusedDate(value)');

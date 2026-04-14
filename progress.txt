@@ -4,6 +4,12 @@ State now keeps focused day and visible month on date-only helpers only.
 Validation note: `npm test -- --runInBand`, `npm run lint`, and `npm run typecheck` passed.
 Next step: TASK-029 if security hardening is next.
 
+TASK-030 done.
+Month-start logic now lives in `lib/date/startOfMonth` and is used by state and keyboard hooks.
+Added regression coverage that rejects raw timestamp APIs and Date mutation calls inside `src/components/date-picker`.
+Validation note: `npm run lint`, `npm run typecheck`, `npm run test:unit`, `npm run test:integration`, and `npm run test:a11y` passed.
+Next step: TASK-032 if date-helper unit coverage is next.
+
 TASK-044 done.
 Vite app shell now live with `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, and `src/App.module.css`.
 `package.json` now exposes `dev`, `build`, and `preview` through Vite.

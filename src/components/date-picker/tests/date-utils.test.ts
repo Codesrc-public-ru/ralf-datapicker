@@ -13,6 +13,7 @@ describe('Date utilities scaffold', () => {
       'src/components/date-picker/lib/date/isSameDay.ts',
       'src/components/date-picker/lib/date/isSameMonth.ts',
       'src/components/date-picker/lib/date/normalizeDate.ts',
+      'src/components/date-picker/lib/date/startOfMonth.ts',
       'src/components/date-picker/lib/date/startOfWeek.ts'
     ];
 
@@ -35,6 +36,7 @@ describe('Date utilities scaffold', () => {
       'src/components/date-picker/lib/date/isSameDay.ts',
       'src/components/date-picker/lib/date/isSameMonth.ts',
       'src/components/date-picker/lib/date/normalizeDate.ts',
+      'src/components/date-picker/lib/date/startOfMonth.ts',
       'src/components/date-picker/lib/date/startOfWeek.ts'
     ];
 
@@ -54,6 +56,7 @@ describe('Date utilities scaffold', () => {
     const sameDaySource = dp.read('src/components/date-picker/lib/date/isSameDay.ts');
     const sameMonthSource = dp.read('src/components/date-picker/lib/date/isSameMonth.ts');
     const todaySource = dp.read('src/components/date-picker/lib/date/getToday.ts');
+    const startOfMonthSource = dp.read('src/components/date-picker/lib/date/startOfMonth.ts');
     const startOfWeekSource = dp.read('src/components/date-picker/lib/date/startOfWeek.ts');
     const navigationSource = dp.read('src/components/date-picker/lib/date/navigation.ts');
     const firstDayOfWeekSource = dp.read('src/components/date-picker/lib/i18n/getFirstDayOfWeek.ts');
@@ -74,6 +77,7 @@ describe('Date utilities scaffold', () => {
     expect(sameMonthSource).toContain('getFullYear() === right.getFullYear()');
     expect(todaySource).toContain("import { normalizeDate } from './normalizeDate';");
     expect(todaySource).toContain('normalizeDate(new Date())');
+    expect(startOfMonthSource).toContain('new Date(date.getFullYear(), date.getMonth(), 1)');
     expect(startOfWeekSource).toContain("import { normalizeDate } from './normalizeDate';");
     expect(startOfWeekSource).toContain('normalizeFirstDayOfWeek');
     expect(startOfWeekSource).toContain('const dayOffset = (normalizedDate.getDay() - normalizedFirstDayOfWeek + 7) % 7;');
@@ -126,6 +130,51 @@ describe('Date utilities scaffold', () => {
     expect(disabledSource).toContain('isDateInRange(normalizedDate, options.minDate, options.maxDate)');
     expect(disabledSource).toContain('disabledDates(normalizedDate)');
     expect(disabledSource).toContain('disabledDates.some((disabledDate) => isSameDay(normalizedDate, disabledDate))');
+  });
+
+  test('avoids raw timestamp and Date mutation APIs in date-picker source', () => {
+    const files = [
+      'src/components/date-picker/DatePicker.tsx',
+      'src/components/date-picker/lib/a11y/getDayAriaLabel.ts',
+      'src/components/date-picker/lib/a11y/getDialogAriaProps.ts',
+      'src/components/date-picker/lib/a11y/getInputDescribedBy.ts',
+      'src/components/date-picker/lib/a11y/getLiveRegionMessage.ts',
+      'src/components/date-picker/lib/a11y/getTriggerAriaLabel.ts',
+      'src/components/date-picker/lib/date/addDays.ts',
+      'src/components/date-picker/lib/date/addMonths.ts',
+      'src/components/date-picker/lib/date/addYears.ts',
+      'src/components/date-picker/lib/date/buildMonthMatrix.ts',
+      'src/components/date-picker/lib/date/compareDates.ts',
+      'src/components/date-picker/lib/date/getToday.ts',
+      'src/components/date-picker/lib/date/isDateDisabled.ts',
+      'src/components/date-picker/lib/date/isDateInRange.ts',
+      'src/components/date-picker/lib/date/isSameDay.ts',
+      'src/components/date-picker/lib/date/isSameMonth.ts',
+      'src/components/date-picker/lib/date/navigation.ts',
+      'src/components/date-picker/lib/date/normalizeDate.ts',
+      'src/components/date-picker/lib/date/startOfMonth.ts',
+      'src/components/date-picker/lib/date/startOfWeek.ts',
+      'src/components/date-picker/model/useDatePickerInput.ts',
+      'src/components/date-picker/model/useDatePickerKeyboard.ts',
+      'src/components/date-picker/model/useDatePickerSelection.ts',
+      'src/components/date-picker/model/useDatePickerState.ts'
+    ];
+
+    const forbiddenPatterns = [
+      'getTime(',
+      'valueOf(',
+      'setMonth(',
+      'setDate(',
+      'setFullYear('
+    ];
+
+    for (const file of files) {
+      const source = dp.read(file);
+
+      for (const pattern of forbiddenPatterns) {
+        expect(source).not.toContain(pattern);
+      }
+    }
   });
 });
 

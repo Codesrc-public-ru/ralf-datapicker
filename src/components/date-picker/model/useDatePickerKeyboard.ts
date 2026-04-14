@@ -15,6 +15,7 @@ import {
   moveDateByWeeks
 } from '../lib/date/navigation';
 import { normalizeDate } from '../lib/date/normalizeDate';
+import { startOfMonth } from '../lib/date/startOfMonth';
 import { getMonthYearLabel } from '../lib/i18n/getMonthYearLabel';
 
 import type { DatePickerStateController } from '../types/internal.types';
@@ -65,8 +66,6 @@ const createNeutralResolution = (): KeyboardNavigationResolution => ({
 
 const getDateKey = (date: Date): string =>
   `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-
-const getMonthStart = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), 1);
 
 export const resolveKeyboardNavigation = (
   key: string,
@@ -197,7 +196,7 @@ export default function useDatePickerKeyboard({
       const normalizedDate = normalizeDate(date);
 
       controller.setFocusedDate(normalizedDate);
-      controller.setVisibleMonth(getMonthStart(normalizedDate));
+      controller.setVisibleMonth(startOfMonth(normalizedDate));
     },
     [controller]
   );
@@ -248,7 +247,7 @@ export default function useDatePickerKeyboard({
       const nextFocusedDate = normalizeDate(resolution.nextFocusedDate);
 
       controller.setFocusedDate(nextFocusedDate);
-      controller.setVisibleMonth(getMonthStart(nextFocusedDate));
+      controller.setVisibleMonth(startOfMonth(nextFocusedDate));
       focusDayButton(nextFocusedDate);
     },
     [

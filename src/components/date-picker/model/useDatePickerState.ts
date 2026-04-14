@@ -4,6 +4,7 @@ import { getToday } from '../lib/date/getToday';
 import { isSameDay } from '../lib/date/isSameDay';
 import { isSameMonth } from '../lib/date/isSameMonth';
 import { normalizeDate } from '../lib/date/normalizeDate';
+import { startOfMonth } from '../lib/date/startOfMonth';
 
 import type { DatePickerInternalState, DatePickerStateController } from '../types/internal.types';
 import type { DatePickerProps } from '../types/public.types';
@@ -29,12 +30,10 @@ const createInitialState = (): DatePickerInternalState => ({
 
 const getDateOnly = (date: Date): Date => normalizeDate(date);
 
-const getMonthStart = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), 1);
-
 const getInitialFocusedDate = (value: Date | null): Date => getDateOnly(value ?? getToday());
 
 const getInitialVisibleMonth = (value: Date | null): Date =>
-  getMonthStart(getInitialFocusedDate(value));
+  startOfMonth(getInitialFocusedDate(value));
 
 const shouldKeepFocusedDate = (currentDate: Date | null, nextDate: Date | null): boolean =>
   !currentDate && !nextDate ? true : !!(currentDate && nextDate && isSameDay(currentDate, nextDate));
