@@ -132,3 +132,9 @@ Validation note: `npm run test:unit`, `npm run lint`, `npm run typecheck`, and `
 TASK-025 done.
 Keyboard navigation now respects `minDate`, `maxDate`, and `disabledDates` when moving focus. `resolveKeyboardNavigation` blocks movement into unavailable targets, so focus stays on the current enabled day. Disabled dates already stay blocked by selection logic, so unavailable days no longer change value by click or keyboard.
 Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
+TASK-001 done.
+DatePicker scaffold already present and matches PRD structure.
+Verified `src/components/date-picker` tree, `index.ts`, `DatePicker.module.css`, and all layer folders/files exist.
+Ran `node scripts/validate-date-picker-structure.mjs`; pass.
+Next step: move to next pending feature only after this commit.
