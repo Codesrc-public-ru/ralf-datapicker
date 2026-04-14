@@ -124,3 +124,11 @@
 **Completion:** Integrated `minDate`/`maxDate`/`disabledDates` into keyboard navigation so unavailable dates do not become the next focused day. `resolveKeyboardNavigation` now blocks movement into disabled targets and keeps the current focus stable. Selection already stays blocked through `selectDate`, so unavailable dates no longer change value by click or keyboard.
 
 **Validation:** `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
+## Progress Update for TASK-039
+
+**Status:** Done.
+
+**Completion:** Added a documented manual QA checklist in `docs/manual-qa-checklist.md`. The checklist covers the PRD release matrix for NVDA + Firefox/Chrome, VoiceOver + Safari, Safari iOS, and Chrome Android, plus repeatable keyboard, focus, live region, error, and mobile usability scenarios.
+
+**Validation:** Checklist content was aligned against PRD sections 11 and 12. No code path changed.

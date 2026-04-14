@@ -218,6 +218,10 @@ Browser-level a11y and interactive flow tooling already existed, so I verified a
 `npm run test:a11y` and `npm run test:browser` both pass here with Chromium fallback.
 Next step: TASK-032 if helper unit coverage is next.
 
+TASK-039 done.
+Added `docs/manual-qa-checklist.md` with a release checklist for keyboard, screen reader, and mobile runs across NVDA + Firefox/Chrome, VoiceOver + Safari, Safari iOS, and Chrome Android.
+Next step: no pending tasks left in `tasks.json`.
+
 TASK-028 done.
 DatePicker styles now adapt for narrow viewports with stacked field controls, full-width dialog, larger touch targets, and explicit focus-visible rings.
 Browser check script now loads the DatePicker CSS and verifies desktop/mobile responsive layout when Chromium is available.
