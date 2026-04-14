@@ -32,6 +32,9 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain('aria-haspopup="dialog"');
     expect(source).toContain('aria-label={getTriggerAriaLabel(props.value, props.locale)}');
     expect(source).toContain('onClick={toggleDialog}');
+    expect(source).toContain('onBlur={inputState.handleInputBlur}');
+    expect(source).toContain('onChange={(event) => inputState.handleInputChange(event.currentTarget.value)}');
+    expect(source).toContain('onFocus={inputState.handleInputFocus}');
     expect(source).toContain('<DatePickerError id={ERROR_ID}>{errorMessage}</DatePickerError>');
     expect(source).toContain('<DatePickerDialog {...dialogAriaProps} id={DIALOG_ID} open={state.isOpen}>');
     expect(source).toContain('<CalendarHeader id={DIALOG_TITLE_ID} label={getMonthYearLabel(dialogMonth, props.locale)} />');

@@ -46,6 +46,19 @@ describe('Input helper layer', () => {
     expect(source).toContain("return `${day}.${month}.${year}`");
   });
 
+  test('keeps the temporary input draft synced to external value changes', () => {
+    const source = dp.read('src/components/date-picker/model/useDatePickerInput.ts');
+
+    expect(source).toContain("import { formatInputDate } from '../lib/input/formatInputDate';");
+    expect(source).toContain("import { sanitizeInputValue } from '../lib/input/sanitizeInputValue';");
+    expect(source).toContain('useEffect');
+    expect(source).toContain('useRef');
+    expect(source).toContain('const getControlledInputValue =');
+    expect(source).toContain('const controlledInputChanged =');
+    expect(source).toContain('if (isInputFocused && isInputDirty) {');
+    expect(source).toContain('setRawInputValue(sanitizeInputValue(nextControlledInputValue));');
+  });
+
   test('keeps validation priority format, range, external, required in one helper', () => {
     const source = dp.read('src/components/date-picker/model/validation.ts');
 

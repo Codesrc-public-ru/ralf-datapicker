@@ -57,8 +57,10 @@ export default function DatePicker(props: DatePickerProps) {
           className={styles.input}
           disabled={props.disabled}
           id={INPUT_ID}
-          onChange={() => undefined}
-          readOnly
+          onBlur={inputState.handleInputBlur}
+          onChange={(event) => inputState.handleInputChange(event.currentTarget.value)}
+          onFocus={inputState.handleInputFocus}
+          readOnly={props.readOnly}
           required={props.required}
           type="text"
           value={displayValue}

@@ -1,3 +1,8 @@
+TASK-017 done.
+Added controlled draft state to `useDatePickerInput` with sync from external `value` and guarded overwrite rules.
+DatePicker input now tracks focus and draft edits through the hook, so the typed text can drift from selected value without losing controlled sync.
+Validation note: `npm run test:unit`, `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
 TASK-041 done.
 Added a separate `typecheck` gate with `tsconfig.json` and `npm run typecheck`.
 Added CSS module and test globals declarations so TypeScript checks the DatePicker source cleanly.
