@@ -24,8 +24,8 @@ const FIELD_LABEL = 'Date';
 const TRIGGER_LABEL = 'Open date picker';
 const INVALID_MESSAGE = 'Invalid date';
 
-const getDisplayValue = (value: Date | null, draftValue: string): string =>
-  value ? formatInputDate(value) : draftValue;
+const getDisplayValue = (value: Date | null, draftValue: string, isDraftVisible: boolean): string =>
+  isDraftVisible ? draftValue : value ? formatInputDate(value) : '';
 
 const getValidationMessage = (isInvalid: boolean, message: string | null): string | null =>
   message ?? (isInvalid ? INVALID_MESSAGE : null);
@@ -35,7 +35,11 @@ export default function DatePicker(props: DatePickerProps) {
   const inputState = useDatePickerInput(props);
   const focusState = useDatePickerFocus(props);
 
-  const displayValue = getDisplayValue(props.value, inputState.rawInputValue);
+  const displayValue = getDisplayValue(
+    props.value,
+    inputState.rawInputValue,
+    inputState.isInputFocused || inputState.isInputDirty
+  );
   const isInvalid = props.invalid || state.validation.isInvalid;
   const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);
   const inputDescribedBy = getInputDescribedBy(errorMessage ? ERROR_ID : null);

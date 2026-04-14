@@ -50,6 +50,7 @@ describe('Input helper layer', () => {
     const source = dp.read('src/components/date-picker/model/useDatePickerInput.ts');
 
     expect(source).toContain("import { formatInputDate } from '../lib/input/formatInputDate';");
+    expect(source).toContain("import { parseInputDate } from '../lib/input/parseInputDate';");
     expect(source).toContain("import { sanitizeInputValue } from '../lib/input/sanitizeInputValue';");
     expect(source).toContain('useEffect');
     expect(source).toContain('useRef');
@@ -57,6 +58,12 @@ describe('Input helper layer', () => {
     expect(source).toContain('const controlledInputChanged =');
     expect(source).toContain('if (isInputFocused && isInputDirty) {');
     expect(source).toContain('setRawInputValue(sanitizeInputValue(nextControlledInputValue));');
+    expect(source).toContain("const sanitizedValue = sanitizeInputValue(nextValue);");
+    expect(source).toContain("const parsedInput = parseInputDate(sanitizedValue);");
+    expect(source).toContain("if (parsedInput.status === 'valid') {");
+    expect(source).toContain('onChange(parsedInput.date);');
+    expect(source).toContain("if (parsedInput.status === 'empty') {");
+    expect(source).toContain('onChange(null);');
   });
 
   test('keeps validation priority format, range, external, required in one helper', () => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { formatInputDate } from '../lib/input/formatInputDate';
+import { parseInputDate } from '../lib/input/parseInputDate';
 import { sanitizeInputValue } from '../lib/input/sanitizeInputValue';
 
 import type { DatePickerInputState } from '../types/internal.types';
@@ -16,6 +17,7 @@ export interface DatePickerInputController extends DatePickerInputState {
 }
 
 export default function useDatePickerInput(props: DatePickerProps): DatePickerInputController {
+  const { onChange } = props;
   const controlledInputValue = getControlledInputValue(props.value);
   const [rawInputValue, setRawInputValue] = useState(controlledInputValue);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -41,9 +43,22 @@ export default function useDatePickerInput(props: DatePickerProps): DatePickerIn
   }, [isInputDirty, isInputFocused, props.value]);
 
   const handleInputChange = useCallback((nextValue: string) => {
-    setRawInputValue(sanitizeInputValue(nextValue));
+    const sanitizedValue = sanitizeInputValue(nextValue);
+
+    setRawInputValue(sanitizedValue);
     setIsInputDirty(true);
-  }, []);
+
+    const parsedInput = parseInputDate(sanitizedValue);
+
+    if (parsedInput.status === 'valid') {
+      onChange(parsedInput.date);
+      return;
+    }
+
+    if (parsedInput.status === 'empty') {
+      onChange(null);
+    }
+  }, [onChange]);
 
   const handleInputFocus = useCallback(() => {
     setIsInputFocused(true);

@@ -100,3 +100,9 @@ DatePicker now toggles calendar dialog from trigger click.
 Open month choice follows selected value when present, else current month from `getToday`.
 DatePicker shell now renders dialog header with month-year label and trigger aria-expanded / aria-haspopup wiring.
 Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
+
+TASK-018 done.
+Manual input now commits valid dates through `onChange(Date)` and full clear through `onChange(null)`.
+Draft text stays visible while editing, even when the controlled value still points to the old date.
+Next step: wire blur-driven error display and submit/external invalid states on top of this input commit flow.
+Validation note: `npm run test:unit`, `npm run lint`, `npm run typecheck`, and `npm test` passed.

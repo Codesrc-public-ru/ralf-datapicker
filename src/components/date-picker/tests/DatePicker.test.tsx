@@ -18,7 +18,11 @@ describe('DatePicker unit scaffold', () => {
     expect(source).toContain("import DatePickerTrigger from './ui/DatePickerTrigger';");
     expect(source).toContain("import DatePickerError from './ui/DatePickerError';");
     expect(source).toContain('const { state, toggleDialog } = useDatePickerState(props);');
-    expect(source).toContain('const displayValue = getDisplayValue(props.value, inputState.rawInputValue);');
+    expect(source).toContain(
+      'const displayValue = getDisplayValue('
+    );
+    expect(source).toContain('inputState.isInputFocused || inputState.isInputDirty');
+    expect(source).toContain('value ? formatInputDate(value) : \'\';');
     expect(source).toContain('const errorMessage = getValidationMessage(isInvalid, state.validation.errorMessage);');
     expect(source).toContain('const dialogMonth = state.visibleMonth ?? props.value ?? getToday();');
     expect(source).toContain(
