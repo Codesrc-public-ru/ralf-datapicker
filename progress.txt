@@ -180,6 +180,11 @@ Selection and open flows now keep centralized a11y helpers in use, and DOM cover
 Validation note: `npm run lint`, `npm run typecheck`, and `npm test` passed.
 Next step: TASK-028 if responsive/mobile accessibility is next.
 
+TASK-043 done.
+Browser-level a11y and interactive flow tooling already existed, so I verified and locked it in instead of rebuilding it.
+`npm run test:a11y` and `npm run test:browser` both pass here with Chromium fallback.
+Next step: TASK-032 if helper unit coverage is next.
+
 TASK-028 done.
 DatePicker styles now adapt for narrow viewports with stacked field controls, full-width dialog, larger touch targets, and explicit focus-visible rings.
 Browser check script now loads the DatePicker CSS and verifies desktop/mobile responsive layout when Chromium is available.

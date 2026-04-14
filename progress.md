@@ -105,6 +105,14 @@
 
 **Status:** Done.
 
+## Progress Update for TASK-043
+
+**Status:** Done.
+
+**Completion:** Browser-level accessibility tooling was already in place via `scripts/run-date-picker-browser-check.mjs`, which now covers both a11y checks with `axe-core` and keyboard/focus flow regression checks. I verified the two exposed commands, `npm run test:a11y` and `npm run test:browser`, and both pass in this workspace using the DOM fallback.
+
+**Validation:** `npm run test:a11y` and `npm run test:browser` passed.
+
 **Completion:** Built the public `DatePicker` shell in `src/components/date-picker/DatePicker.tsx`. The component now wires controlled `value` into `formatInputDate`, connects the shell to `useDatePickerState`, `useDatePickerInput`, and `useDatePickerFocus`, and renders the basic field, trigger, and error slot through the presentational UI layer.
 
 **Validation:** Shell wiring is covered by the updated source-level DatePicker scaffold test. Next step is open/close and calendar behavior in the following task.
