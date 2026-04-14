@@ -1,3 +1,11 @@
+## Progress Update for TASK-011
+
+**Status:** Done.
+
+**Completion:** Implemented the validation layer in `src/components/date-picker/model/validation.ts`. The helper now resolves one error at a time in the order format -> range -> external -> required, and the internal validation state now carries `isInvalid` alongside `isVisible`.
+
+**Validation:** `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 ## Progress Update for TASK-006
 
 **Status:** Done.

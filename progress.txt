@@ -1,3 +1,11 @@
+TASK-011 done.
+Validation layer now lives in `src/components/date-picker/model/validation.ts`.
+It resolves one error at a time in the order format -> range -> external -> required.
+State now carries `isInvalid` alongside `isVisible`.
+Validation checks reuse `isDateInRange` and `formatInputDate` for message text.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed.
+Validation note: `uv run ruff check .` and `uv run pytest` could not run because `uv` is not installed in this workspace.
+
 TASK-009 done.
 i18n helpers now exist in lib/i18n.
 formatMonthLabel, getMonthYearLabel, formatWeekdayLabel, formatFullDateLabel, getWeekdayNames, and getFirstDayOfWeek use Intl and date-only normalization.

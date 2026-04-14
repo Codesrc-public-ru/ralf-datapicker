@@ -15,7 +15,8 @@ const createInitialState = (): DatePickerInternalState => ({
   validation: {
     errorType: null,
     errorMessage: null,
-    isVisible: false
+    isVisible: false,
+    isInvalid: false
   }
 });
 

@@ -44,4 +44,32 @@ describe('Input helper layer', () => {
     expect(source).toContain('date.getFullYear()');
     expect(source).toContain("return `${day}.${month}.${year}`");
   });
+
+  test('keeps validation priority format, range, external, required in one helper', () => {
+    const source = dp.read('src/components/date-picker/model/validation.ts');
+
+    expect(source).toContain('export interface DatePickerValidationInput');
+    expect(source).toContain('export const getDatePickerValidationState');
+    expect(source).toContain('resolveDatePickerValidationState');
+    expect(source).toContain('isDateInRange');
+    expect(source).toContain('formatInputDate');
+    expect(source).toContain("return 'format';");
+    expect(source).toContain("return 'range';");
+    expect(source).toContain("return 'external';");
+    expect(source).toContain("return 'required';");
+    expect(source.indexOf("return 'format';") < source.indexOf("return 'range';")).toBe(true);
+    expect(source.indexOf("return 'range';") < source.indexOf("return 'external';")).toBe(true);
+    expect(source.indexOf("return 'external';") < source.indexOf("return 'required';")).toBe(true);
+    expect(source).toContain('externalErrorMessage');
+    expect(source).toContain('isVisible: input.isVisible ?? false');
+    expect(source).toContain('isInvalid: errorType !== null');
+  });
+
+  test('marks validation state as invalid alongside visible error state', () => {
+    const source = dp.read('src/components/date-picker/types/internal.types.ts');
+    const hookSource = dp.read('src/components/date-picker/model/useDatePickerState.ts');
+
+    expect(source).toContain('isInvalid: boolean;');
+    expect(hookSource).toContain('isInvalid: false');
+  });
 });

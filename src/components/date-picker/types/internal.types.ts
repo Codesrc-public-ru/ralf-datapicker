@@ -4,6 +4,7 @@ export interface DatePickerValidationState {
   errorType: ValidationErrorType;
   errorMessage: string | null;
   isVisible: boolean;
+  isInvalid: boolean;
 }
 
 export interface DatePickerInputState {
