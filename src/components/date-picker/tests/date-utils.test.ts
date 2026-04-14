@@ -100,4 +100,31 @@ describe('Date utilities scaffold', () => {
     expect(monthMatrixSource).toContain('for (let dayIndex = 0; dayIndex < DAYS_IN_WEEK; dayIndex += 1)');
     expect(monthMatrixSource).toContain('matrix.push(week);');
   });
+
+  test('keeps range checks inclusive and date-only', () => {
+    const rangeSource = dp.read('src/components/date-picker/lib/date/isDateInRange.ts');
+
+    expect(rangeSource).toContain("import { compareByDay } from './compareDates';");
+    expect(rangeSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(rangeSource).toContain('normalizedMinDate &&');
+    expect(rangeSource).toContain('normalizedMaxDate &&');
+    expect(rangeSource).toContain('compareByDay(normalizedMinDate, normalizedMaxDate) > 0');
+    expect(rangeSource).toContain('compareByDay(normalizedDate, normalizedMinDate) < 0');
+    expect(rangeSource).toContain('compareByDay(normalizedDate, normalizedMaxDate) > 0');
+    expect(rangeSource).toContain('return true;');
+  });
+
+  test('keeps disabled date logic deterministic for range, array, and predicate rules', () => {
+    const disabledSource = dp.read('src/components/date-picker/lib/date/isDateDisabled.ts');
+
+    expect(disabledSource).toContain("import type { DatePickerDisabledDates } from '../../types/public.types';");
+    expect(disabledSource).toContain("import { isDateInRange } from './isDateInRange';");
+    expect(disabledSource).toContain("import { isSameDay } from './isSameDay';");
+    expect(disabledSource).toContain("import { normalizeDate } from './normalizeDate';");
+    expect(disabledSource).toContain('const isDisabledDatesPredicate =');
+    expect(disabledSource).toContain("typeof disabledDates === 'function'");
+    expect(disabledSource).toContain('isDateInRange(normalizedDate, options.minDate, options.maxDate)');
+    expect(disabledSource).toContain('disabledDates(normalizedDate)');
+    expect(disabledSource).toContain('disabledDates.some((disabledDate) => isSameDay(normalizedDate, disabledDate))');
+  });
 });

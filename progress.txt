@@ -25,3 +25,8 @@ Month math now exists in startOfWeek, getFirstDayOfWeek, and buildMonthMatrix.
 Grid starts from locale week start and builds a 6x7 month matrix.
 Next step: wire this grid into calendar UI and month navigation.
 Validation note: `uv run ruff check .` and `uv run pytest` both fail here because `uv` is missing. Local node harness passed.
+TASK-007 done.
+Range and disabled helpers now work in lib/date.
+isDateInRange now compares date-only values and treats reversed bounds as invalid.
+isDateDisabled now checks min/max first, then disabledDates arrays and predicates with normalized days.
+Validation note: `node scripts/run-date-picker-tests.mjs all` and `node scripts/validate-date-picker-structure.mjs` passed. `uv run ruff check .` and `uv run pytest` could not run here because `uv` is not installed.
