@@ -17,33 +17,331 @@ if (!allowedModes.has(mode)) {
   process.exit(1);
 }
 
+await ensureBuiltApp();
+
 const chromiumExecutable = findChromiumExecutable();
-const browserBundle = buildBrowserBundle(rootDir);
-const htmlPath = writeBrowserHtml(rootDir, browserBundle);
-const desktopChromiumResult = runChromium(chromiumExecutable, htmlPath, ['--window-size=1280,900']);
-const mobileChromiumResult = runChromium(chromiumExecutable, htmlPath, ['--window-size=390,844']);
 
-if (desktopChromiumResult.status === 0 && mobileChromiumResult.status === 0) {
-  const desktopResult = parseBrowserResult(desktopChromiumResult.stdout);
-  const mobileResult = parseBrowserResult(mobileChromiumResult.stdout);
+if (chromiumExecutable) {
+  const browserHtmlPath = await buildBrowserHtml(rootDir);
 
-  if (desktopResult.status !== 'pass') {
-    console.error(desktopResult.message);
-    process.exit(1);
+  try {
+    const browserUrl = pathToFileURL(browserHtmlPath).href;
+    const desktopChromiumResult = runChromium(chromiumExecutable, browserUrl, [
+      '--allow-file-access-from-files',
+      '--window-size=1280,900'
+    ]);
+    const mobileChromiumResult = runChromium(chromiumExecutable, browserUrl, [
+      '--allow-file-access-from-files',
+      '--window-size=390,844'
+    ]);
+
+    if (desktopChromiumResult.status !== 0) {
+      console.error(desktopChromiumResult.stderr || desktopChromiumResult.stdout);
+      process.exit(desktopChromiumResult.status ?? 1);
+    }
+
+    if (mobileChromiumResult.status !== 0) {
+      console.error(mobileChromiumResult.stderr || mobileChromiumResult.stdout);
+      process.exit(mobileChromiumResult.status ?? 1);
+    }
+
+    const desktopResult = parseBrowserResult(desktopChromiumResult.stdout);
+    const mobileResult = parseBrowserResult(mobileChromiumResult.stdout);
+
+    if (desktopResult.status !== 'pass') {
+      console.error(desktopResult.message);
+      process.exit(1);
+    }
+
+    if (mobileResult.status !== 'pass') {
+      console.error(mobileResult.message);
+      process.exit(1);
+    }
+
+    console.log(`ok browser checks: ${desktopResult.summary}; ${mobileResult.summary}`);
+  } finally {
+    fs.rmSync(path.dirname(browserHtmlPath), { recursive: true, force: true });
   }
-
-  if (mobileResult.status !== 'pass') {
-    console.error(mobileResult.message);
-    process.exit(1);
-  }
-
-  console.log(`ok browser checks: ${desktopResult.summary}; ${mobileResult.summary}`);
-  process.exit(0);
+} else {
+  console.warn('Chromium browser check blocked here. Falling back to DOM harness.');
+  await runFallbackChecks();
+  console.log('ok browser checks: DOM fallback pass');
 }
 
-console.warn('Chromium browser check blocked here. Falling back to DOM harness.');
-await runFallbackChecks();
-console.log('ok browser checks: DOM fallback pass');
+async function ensureBuiltApp() {
+  const viteBin = path.join(rootDir, 'node_modules', 'vite', 'bin', 'vite.js');
+  const result = spawnSync(process.execPath, [viteBin, 'build'], {
+    cwd: rootDir,
+    encoding: 'utf8',
+    maxBuffer: 20 * 1024 * 1024
+  });
+
+  if (result.status !== 0) {
+    if (result.stdout) {
+      process.stderr.write(result.stdout);
+    }
+    if (result.stderr) {
+      process.stderr.write(result.stderr);
+    }
+    throw new Error('Vite build failed before browser check.');
+  }
+}
+
+async function buildBrowserHtml(rootDir) {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'date-picker-browser-check-'));
+  const distDir = path.join(rootDir, 'dist');
+  const indexHtmlPath = path.join(distDir, 'index.html');
+  const browserCheckScript = buildBrowserCheckScript(mode);
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+  const fileAssetBase = `${pathToFileURL(distDir).href}/assets/`;
+  const axeFileUrl = pathToFileURL(path.join(rootDir, 'node_modules/axe-core/axe.js')).href;
+  const rewrittenHtml = indexHtml
+    .replaceAll('src="/assets/', `src="${fileAssetBase}`)
+    .replaceAll('href="/assets/', `href="${fileAssetBase}`);
+  const html = rewrittenHtml.replace(
+    '</body>',
+    `<pre id="result" data-status="pending" hidden></pre><script src="${axeFileUrl}"></script><script>${browserCheckScript}</script></body>`
+  );
+  const htmlPath = path.join(tempDir, 'index.html');
+
+  fs.writeFileSync(htmlPath, html);
+  return htmlPath;
+}
+
+function buildBrowserCheckScript(currentMode) {
+  return String.raw`
+(() => {
+  const resultNode = document.getElementById('result') || createResultNode();
+
+  if (document.readyState !== 'complete') {
+    window.addEventListener(
+      'load',
+      () => {
+        setTimeout(runChecks, 0);
+      },
+      { once: true }
+    );
+    return;
+  }
+
+  setTimeout(runChecks, 0);
+
+  function runChecks() {
+    const payload = {
+      mode: ${JSON.stringify(currentMode)},
+      summary: [],
+      status: 'pass'
+    };
+
+    try {
+      const loadSampleButton = findButtonByText('Load sample');
+      const selectedDate = new Date(2026, 4, 12);
+
+      loadSampleButton.click();
+      afterTick(() => {
+        try {
+          const trigger = findTriggerButton();
+          const selectedLabel = formatFullDateLabel(selectedDate, 'en-US');
+
+          assert(
+            trigger.getAttribute('aria-label') === 'Change date, selected ' + selectedLabel,
+            'trigger should describe the selected value'
+          );
+          payload.summary.push('loaded built app');
+
+          trigger.click();
+          afterTick(() => {
+            try {
+              const dialog = findDialog();
+              const selectedDay = findDayButton(selectedDate, 'selected');
+              const input = document.querySelector('input');
+              const field = input ? input.parentElement : null;
+
+              assert(dialog.getAttribute('aria-modal') === 'true', 'dialog should declare aria-modal');
+              assert(document.activeElement === selectedDay, 'selected day should receive initial focus');
+              assert(field && input, 'shell should render field and input nodes');
+
+              if (window.innerWidth <= 520) {
+                const fieldStyle = getComputedStyle(field);
+
+                assert(fieldStyle.flexDirection === 'column', 'mobile field should stack input and trigger');
+                assert(input.getBoundingClientRect().height >= 44, 'mobile input should stay touch friendly');
+                assert(trigger.getBoundingClientRect().height >= 44, 'mobile trigger should stay touch friendly');
+                payload.summary.push('mobile layout stacks controls');
+              } else {
+                assert(
+                  getComputedStyle(field).flexDirection === 'row',
+                  'desktop field should keep inline layout'
+                );
+                payload.summary.push('desktop layout keeps inline controls');
+              }
+
+              dispatchKey(dialog, 'Tab');
+              assert(dialog.contains(document.activeElement), 'tab should stay trapped in dialog');
+
+              const nextDay = findDayButton(new Date(2026, 4, 13));
+              nextDay.click();
+              afterTick(() => {
+                afterTick(() => {
+                  try {
+                    const selectedInput = document.querySelector('input');
+                    assert(
+                      selectedInput.value === formatInputDate(new Date(2026, 4, 13)),
+                      'selection should update controlled value'
+                    );
+                    payload.summary.push('selection updates controlled value');
+
+                    payload.message = payload.summary.join('; ');
+                    finish('pass', payload);
+                  } catch (error) {
+                    finish('fail', {
+                      ...payload,
+                      message: error instanceof Error ? error.stack || error.message : String(error)
+                    });
+                  }
+                });
+              });
+            } catch (error) {
+              finish('fail', {
+                ...payload,
+                message: error instanceof Error ? error.stack || error.message : String(error)
+              });
+            }
+          });
+        } catch (error) {
+          finish('fail', {
+            ...payload,
+            message: error instanceof Error ? error.stack || error.message : String(error)
+          });
+        }
+      });
+    } catch (error) {
+      finish('fail', {
+        ...payload,
+        message: error instanceof Error ? error.stack || error.message : String(error)
+      });
+    }
+  }
+
+  function finish(status, nextPayload) {
+    render(status, nextPayload);
+  }
+
+  function render(status, nextPayload) {
+    resultNode.textContent = JSON.stringify(nextPayload, null, 2);
+    resultNode.dataset.status = status;
+    resultNode.hidden = true;
+  }
+
+  function createResultNode() {
+    const node = document.createElement('pre');
+    node.id = 'result';
+    node.dataset.status = 'pending';
+    node.hidden = true;
+    document.body.appendChild(node);
+    return node;
+  }
+
+  function afterTick(callback) {
+    setTimeout(callback, 0);
+  }
+
+  function findTriggerButton() {
+    const trigger = document.querySelector('button[aria-haspopup="dialog"]');
+
+    if (!trigger) {
+      throw new Error('Missing trigger button in built DOM.');
+    }
+
+    return trigger;
+  }
+
+  function findButtonByText(text) {
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const button = buttons.find((candidate) => (candidate.textContent || '').trim() === text);
+
+    if (!button) {
+      throw new Error('Missing button with text ' + text);
+    }
+
+    return button;
+  }
+
+  function findDialog() {
+    const dialog = document.querySelector('[role="dialog"]');
+
+    if (!dialog) {
+      throw new Error('Missing dialog in built DOM.');
+    }
+
+    return dialog;
+  }
+
+  function findDayButton(date, state = null) {
+    const label = formatFullDateLabel(date, 'en-US');
+    const targetLabel = state ? label + ', ' + state : label;
+    const button = Array.from(document.querySelectorAll('button')).find((candidate) => {
+      return candidate.getAttribute('aria-label') === targetLabel;
+    });
+
+    if (!button) {
+      throw new Error('Missing day button with label ' + targetLabel);
+    }
+
+    return button;
+  }
+
+  function formatInputDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear());
+    return day + '.' + month + '.' + year;
+  }
+
+  function formatFullDateLabel(date, locale) {
+    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return new Intl.DateTimeFormat(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(normalizedDate);
+  }
+
+  function dispatchKey(target, key) {
+    const keyCode = getKeyCode(key);
+    const eventInit = {
+      bubbles: true,
+      cancelable: true,
+      code: key,
+      key,
+      keyCode,
+      which: keyCode
+    };
+
+    target.dispatchEvent(new KeyboardEvent('keydown', eventInit));
+    target.dispatchEvent(new KeyboardEvent('keyup', eventInit));
+  }
+
+  function getKeyCode(key) {
+    switch (key) {
+      case 'Tab':
+        return 9;
+      case 'Escape':
+        return 27;
+      default:
+        return 0;
+    }
+  }
+
+  function assert(condition, message) {
+    if (!condition) {
+      throw new Error(message);
+    }
+  }
+})();
+`;
+}
 
 function buildBrowserBundle(rootDir) {
   const moduleSources = new Map();
@@ -151,11 +449,11 @@ function writeBrowserHtml(rootDir, browserBundle) {
         summary: [],
         status: 'pass'
       };
+      const moduleCache = new Map();
+      const moduleFactories = new Map();
 
       try {
         const bundle = JSON.parse(document.getElementById('module-data').textContent);
-        const moduleCache = new Map();
-        const moduleFactories = new Map();
 
         for (const [moduleId, source] of Object.entries(bundle.modules)) {
           moduleFactories.set(moduleId, new Function('module', 'exports', 'require', source));
@@ -465,7 +763,7 @@ function escapeHtml(value) {
   return value;
 }
 
-function runChromium(chromiumExecutable, htmlPath, extraArgs = []) {
+function runChromium(chromiumExecutable, url, extraArgs = []) {
   return spawnSync(
     chromiumExecutable,
     [
@@ -480,7 +778,7 @@ function runChromium(chromiumExecutable, htmlPath, extraArgs = []) {
       '--virtual-time-budget=8000',
       ...extraArgs,
       '--dump-dom',
-      pathToFileUrl(htmlPath)
+      url
     ],
     {
       encoding: 'utf8',
@@ -494,7 +792,7 @@ function pathToFileUrl(filePath) {
 }
 
 function parseBrowserResult(output) {
-  const statusMatch = output.match(/<pre id="result" data-status="([^"]+)">([\s\S]*?)<\/pre>/);
+  const statusMatch = output.match(/<pre id="result"[^>]*data-status="([^"]+)"[^>]*>([\s\S]*?)<\/pre>/);
 
   if (!statusMatch) {
     return {
@@ -651,5 +949,5 @@ function findChromiumExecutable() {
     }
   }
 
-  throw new Error('Could not find Chromium executable.');
+  return null;
 }
