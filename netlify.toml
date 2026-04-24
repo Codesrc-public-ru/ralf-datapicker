@@ -3,14 +3,12 @@
   publish = "dist"
 
 [build.environment]
-  PUBLIC_URL = "/"
   NODE_VERSION = "18"
 
 [[redirects]]
-  from = "/static/*"
-  to = "/static/:splat"
+  from = "/*"
+  to = "/index.html"
   status = 200
-  force = false
 
 [[redirects]]
   from = "/*"
